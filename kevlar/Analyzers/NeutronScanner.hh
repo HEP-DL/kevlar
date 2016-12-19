@@ -15,7 +15,8 @@
 #include <string>
 
 namespace kevlar{
-  class NeutronScanner : art::EDAnalyzer {
+  class NeutronScanner : public art::EDAnalyzer {
+    std::string fProducerName;
     std::string fOutFileName;
     std::ofstream fCSVOut;
   public:

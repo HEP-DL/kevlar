@@ -4,8 +4,11 @@
 #include "nusimdata/SimulationBase/MCParticle.h"
 
 namespace kevlar{
-  NeutronScanner::NeutronScanner(fhicl::ParameterSet const & p)
-  fOutFileName = pSet.get<std::string>("OutFileName","neutronscanner.csv")
+  NeutronScanner::NeutronScanner(fhicl::ParameterSet const& pSet) :
+    art::EDAnalyzer(pSet),
+    fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
+    fOutFileName(pSet.get<std::string>("OutFileName","neutronscanner.csv")),
+    fCSVOut()
   {
 
   }
@@ -19,7 +22,7 @@ namespace kevlar{
   void NeutronScanner::analyze(art::Event const & evt)
   {
     art::Handle<std::vector<simb::MCParticle> > particles;
-    evt.getByLabel(fProducerName, channels);
+    evt.getByLabel(fProducerName, particles);
     for (auto particle: *particles){
       int pdg= particle.PdgCode();
       //Cut on Neutrons
@@ -44,7 +47,7 @@ namespace kevlar{
       fCSVOut.close();
     }    
     fCSVOut.open(fOutFileName, 
-      std::ofstream::out | std::ofstream::app)
+      std::ofstream::out | std::ofstream::app);
     fCSVOut<<"Mother,process,x,y,z,t,Px,Py,Pz,E,";
   }
   void NeutronScanner::endSubRun(art::SubRun const&)

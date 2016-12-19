@@ -20,8 +20,8 @@ flcdir  product_dir     fcl
 product          version
 kevlar v1_00_00
 larsim v06_09_00
-gcc		 v4_8_1
-cetbuildtools   v3_07_11       -       only_for_build
+gcc		 v4_9_3a
+cetbuildtools   v5_06_01       -       only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the dependencies.
