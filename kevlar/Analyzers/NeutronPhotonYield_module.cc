@@ -29,10 +29,12 @@ namespace kevlar{
     evt.getByLabel(fProducerName, particles);
     std::map<int,int> neutronIds;
     std::map<int, std::string> processes;
+    std::map<int, double> energies;
     for (auto particle: *particles){
       int pdg= particle.PdgCode();
       if (pdg != 2112) continue;
-      neutronIds.insert(std::make_pair(particle.TrackId(),0 ));      
+      neutronIds.insert(std::make_pair(particle.TrackId(),0 ));
+      energies[mother] = particle.E();
     }
     for (auto particle: *particles){
       int pdg = particle.PdgCode();
@@ -46,7 +48,7 @@ namespace kevlar{
     for(std::map<int,int>::iterator it = neutronIds.begin(); 
         it != neutronIds.end(); ++it )
     {
-      fCSVOut<<evt.id()<<", "<<it->first<<", "<<it->second<<", "<<processes[it->first]<<std::endl;
+      fCSVOut<<evt.id()<<", "<<it->first<<", "<<energies[it->first]<<", "<<it->second<<", "<<processes[it->first]<<std::endl;
     }
   }
   void NeutronPhotonYield::beginSubRun(art::SubRun const& )
@@ -57,7 +59,7 @@ namespace kevlar{
     }    
     fCSVOut.open(fOutFileName, 
       std::ofstream::out | std::ofstream::app);
-    fCSVOut<<"EventID, TrackID, #Photons, Process"<<std::endl;
+    fCSVOut<<"EventID, TrackID, Energy, #Photons, Process"<<std::endl;
   }
   void NeutronPhotonYield::endSubRun(art::SubRun const&)
   {
