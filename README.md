@@ -1,6 +1,6 @@
 # kevlar
 
-You guessed it. This is Kevin's personal library for LArSoft related items
+You guessed it. This is Kevin's library for LArSoft related items
 
 ## Contents
 
