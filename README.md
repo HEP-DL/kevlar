@@ -16,7 +16,7 @@ You guessed it. This is Kevin's personal library for LArSoft related items
 2. Setup MRB
 
 ~~~ bash
-setup MRB
+setup mrb
 export MRB_PROJECT=kevlar
 ~~~
 
@@ -45,9 +45,10 @@ mrb updateDepsCM
 5. Build
 
 ~~~ bash
-cd ../build
+cd ../build*
 mrbsetenv
-mrb b mrb i
+mrb b 
+mrb i
 ~~~
 
 6. Setup local product

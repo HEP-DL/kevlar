@@ -17,5 +17,6 @@ physics:
 
   }
  }
- end_paths=[ neutronscanner ]
+ ana: [ neutronscanner ]
+ end_paths:[ ana ]
 }
