@@ -9,6 +9,14 @@ simple_plugin( NeutronScanner module
   BASENAME_ONLY
 )
 
+simple_plugin( NeutronPhotonYield module
+    ${ART_FRAMEWORK_PRINCIPAL}
+    nusimdata_SimulationBase
+    ${ROOT_BASIC_LIB_LIST}
+  BASENAME_ONLY
+)
+
+
 install_headers()
 install_source()
 install_fhicl()
