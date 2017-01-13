@@ -8,18 +8,19 @@
 #include <string>
 
 namespace kevlar{
+  
   NeutronPhotonYield::NeutronPhotonYield(fhicl::ParameterSet const& pSet) :
     art::EDAnalyzer(pSet),
     fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
     fOutFileName(pSet.get<std::string>("OutFileName","NeutronPhotonYield.csv")),
     fCSVOut()
-  {
-
-  }
+  {}
+  
   NeutronPhotonYield::~NeutronPhotonYield()
   {
     if(fCSVOut.is_open()) fCSVOut.close();
   }
+  
   void NeutronPhotonYield::analyze(art::Event const & evt)
   {
     art::Handle<std::vector<simb::MCParticle> > particles;
@@ -42,9 +43,10 @@ namespace kevlar{
     }
     for(std::map<int,int>::iterator it = neutronIds.begin(); 
         it != neutronIds.end(); ++it )
-      fCSVOut<<evt.id()<<", "<<it->first<<", "<<energies[it->first]<<", "
+      fCSVOut<<evt.event()<<", "<<it->first<<", "<<energies[it->first]<<", "
         <<it->second<<", "<<processes[it->first]<<std::endl;
   }
+  
   void NeutronPhotonYield::beginSubRun(art::SubRun const& )
   {
     if(fCSVOut.is_open()) fCSVOut.close();
@@ -52,6 +54,7 @@ namespace kevlar{
       std::ofstream::out | std::ofstream::app);
     fCSVOut<<"EventID, TrackID, Energy, #Photons, Process"<<std::endl;
   }
+  
   void NeutronPhotonYield::endSubRun(art::SubRun const&)
   {
     if(fCSVOut.is_open()) fCSVOut.close();
