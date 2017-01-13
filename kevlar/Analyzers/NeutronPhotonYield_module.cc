@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <map>
+#include <string>
 
 namespace kevlar{
   NeutronPhotonYield::NeutronPhotonYield(fhicl::ParameterSet const& pSet) :
@@ -27,6 +28,7 @@ namespace kevlar{
     art::Handle<std::vector<simb::MCParticle> > particles;
     evt.getByLabel(fProducerName, particles);
     std::map<int,int> neutronIds;
+    std::map<int, std::string> processes;
     for (auto particle: *particles){
       int pdg= particle.PdgCode();
       if (pdg != 2112) continue;
@@ -38,12 +40,13 @@ namespace kevlar{
         int mother = particle.Mother();
         if(neutronIds.find(mother) == neutronIds.end()) continue;
         neutronIds[mother] = neutronIds[mother]+1;
+        processes[mother] = particle.Process();
       }
     }
     for(std::map<int,int>::iterator it = neutronIds.begin(); 
         it != neutronIds.end(); ++it )
     {
-      fCSVOut<<evt.id()<<" , "<<it->first<<" , "<<it->second<<std::endl;
+      fCSVOut<<evt.id()<<", "<<it->first<<", "<<it->second<<", "<<processes[it->first]<<std::endl;
     }
   }
   void NeutronPhotonYield::beginSubRun(art::SubRun const& )
@@ -54,7 +57,7 @@ namespace kevlar{
     }    
     fCSVOut.open(fOutFileName, 
       std::ofstream::out | std::ofstream::app);
-    fCSVOut<<"EventID, TrackID, #Photons"<<std::endl;
+    fCSVOut<<"EventID, TrackID, #Photons, Process"<<std::endl;
   }
   void NeutronPhotonYield::endSubRun(art::SubRun const&)
   {
