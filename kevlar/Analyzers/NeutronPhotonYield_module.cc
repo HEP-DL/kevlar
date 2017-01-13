@@ -18,10 +18,7 @@ namespace kevlar{
   }
   NeutronPhotonYield::~NeutronPhotonYield()
   {
-    if(fCSVOut.is_open())
-    {
-      fCSVOut.close();
-    }
+    if(fCSVOut.is_open()) fCSVOut.close();
   }
   void NeutronPhotonYield::analyze(art::Event const & evt)
   {
@@ -31,14 +28,12 @@ namespace kevlar{
     std::map<int, std::string> processes;
     std::map<int, double> energies;
     for (auto particle: *particles){
-      int pdg= particle.PdgCode();
-      if (pdg != 2112) continue;
+      if (particle.PdgCode() != 2112) continue;
       neutronIds.insert(std::make_pair(particle.TrackId(),0 ));
-      energies[mother] = particle.E();
+      energies[particle.TrackId()] = particle.E();
     }
     for (auto particle: *particles){
-      int pdg = particle.PdgCode();
-      if(pdg == 22 ){
+      if(particle.PdgCode()== 22 ){
         int mother = particle.Mother();
         if(neutronIds.find(mother) == neutronIds.end()) continue;
         neutronIds[mother] = neutronIds[mother]+1;
@@ -47,25 +42,18 @@ namespace kevlar{
     }
     for(std::map<int,int>::iterator it = neutronIds.begin(); 
         it != neutronIds.end(); ++it )
-    {
-      fCSVOut<<evt.id()<<", "<<it->first<<", "<<energies[it->first]<<", "<<it->second<<", "<<processes[it->first]<<std::endl;
-    }
+      fCSVOut<<evt.id()<<", "<<it->first<<", "<<energies[it->first]<<", "
+        <<it->second<<", "<<processes[it->first]<<std::endl;
   }
   void NeutronPhotonYield::beginSubRun(art::SubRun const& )
   {
-    if(fCSVOut.is_open())
-    {
-      fCSVOut.close();
-    }    
+    if(fCSVOut.is_open()) fCSVOut.close();
     fCSVOut.open(fOutFileName, 
       std::ofstream::out | std::ofstream::app);
     fCSVOut<<"EventID, TrackID, Energy, #Photons, Process"<<std::endl;
   }
   void NeutronPhotonYield::endSubRun(art::SubRun const&)
   {
-    if(fCSVOut.is_open())
-    {
-      fCSVOut.close();
-    } 
+    if(fCSVOut.is_open()) fCSVOut.close();
   }
 }
