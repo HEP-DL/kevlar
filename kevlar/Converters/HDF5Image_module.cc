@@ -1,4 +1,5 @@
 #include "kevlar/Converters/HDF5Image.hh"
+#include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
@@ -6,9 +7,12 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
 
+#include <boost/multi_array.hpp>
+
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <vector>
 
 namespace kevlar{
 
@@ -17,21 +21,37 @@ namespace kevlar{
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
       fDims{
-        pSet.get<uint32_t>("ImageWidth",6000),
+        H5S_UNLIMITED,
+        pSet.get<uint32_t>("NChannels",3),
         pSet.get<uint32_t>("ImageHeight",9600),
-        pSet.get<uint32_t>("NChannels",3)
+        pSet.get<uint32_t>("ImageWidth",6000),
       },
-      fDataSpace(HDF5Image_RANK, fDims),
-      fDataSet(NULL);
+      fChunkDims{
+        pSet.get<uint32_t>("ChunkSize",1),
+        pSet.get<uint32_t>("NChannels",3),
+        pSet.get<uint32_t>("ImageHeight",9600),
+        pSet.get<uint32_t>("ImageWidth",6000),        
+      },
+      fDataSpace(4, fDims),
+      fParms(),
+      fDataSet(NULL),
+      fFillValue(pSet.get<uint32_t>("FillValue",0)),
+      fNEvents(0)
   {
-
+      fParms.setChunk( 4, fChunkDims );
+      fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
   }
+
   HDF5Image::~HDF5Image()
   {
 
   }
+
   void HDF5Image::analyze(art::Event const & evt)
   {
+    //Create the dataset
+    boost::multi_array<double, 3>  _image(boost::extents[3][9600][6000]);
+    //now write things into the data set;
     art::Handle<std::vector<raw::RawDigit> > digits;
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){
@@ -44,24 +64,35 @@ namespace kevlar{
       std::cout<<plane<<","<<wire<<std::endl<<"\t";
       uint32_t tick=0;
       for(auto code: waveform){
-        //now we've got wire, tick and code (x,y and pixel value)
-        //also, we've got plane ()
         std::cout<<"("<<tick<<","<<code<<"),";
 
+        if(plane>=fDims[0] || tick>=fDims[1] || wire>=fDims[2]){
+          std::cout<<"DIMENSIONS OUT OF ALIGNMENT: "<<std::endl;
+          std::cout<<"("<<plane<<','<<tick<<','<<wire<<")"<<">=";
+          std::cout<<"("<<fDims[0]<<','<<fDims[1]<<','<<fDims[2]<<")";
+          tick++;
+          continue;
+        }
+        _image[plane][tick][wire] = code;
         ++tick;
       }
       std::cout<<std::endl;
     }
+
+    hsize_t offset[4]={this->fNEvents,0,0,0};
+    this->fDataSpace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+    this->fDataSet->write( _image.data(), H5::PredType::NATIVE_INT, this->fDataSpace, this->fDataSpace );
+    ++(this->fNEvents);
   }
   void HDF5Image::beginSubRun(art::SubRun const &)
   {
-    art::ServiceHandle<kevlar::H5File> _OutputFile;
+    art::ServiceHandle<kevlar::HDF5File> _OutputFile;
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,
-      this->fDataSpace);
+      this->fDataSpace,
+      this->fParms);
   }
   void HDF5Image::endSubRun(art::SubRun const & sr)
   {
 
   }
-
 }

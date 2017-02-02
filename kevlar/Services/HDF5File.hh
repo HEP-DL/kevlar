@@ -20,7 +20,8 @@ namespace kevlar{
   public:
     HDF5File(fhicl::ParameterSet const&);
     ~HDF5File();
-    H5::DataSet* CreateDataSet(std::string& name, H5::DataSpace& space);
+    H5::DataSet* CreateDataSet(std::string& name, H5::DataSpace& space,
+      H5::DSetCreatPropList& plist);
   };
 }
 
