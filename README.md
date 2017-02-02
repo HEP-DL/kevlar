@@ -1,6 +1,6 @@
 # kevlar
 
-If you're going to interface with LArSoft data, you're going to need a kevlar vest.
+It's dangerous to interface directly with LArSoft alone. Bring this kevlar vest.
 
 ## Contents
 
@@ -10,6 +10,9 @@ If you're going to interface with LArSoft data, you're going to need a kevlar ve
 * Converters
   * HDF5Image
     * Converts RawDigits to HDF5 Image format
+* Services
+  * HDF5File
+    * Provides file output service for HDF5 analyzers
 
 ## Installation
 
