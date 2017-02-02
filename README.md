@@ -1,13 +1,15 @@
 # kevlar
 
-You guessed it. This is Kevin's library for LArSoft related items
+If you're going to interface with LArSoft data, you're going to need a kevlar vest.
 
 ## Contents
 
 * Analyzers
   * NeutronScanner
     * This is designed to fetch information out on neutrons in MCParticles
-
+* Converters
+  * HDF5Image
+    * Converts RawDigits to HDF5 Image format
 
 ## Installation
 
