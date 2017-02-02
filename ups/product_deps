@@ -1,0 +1,41 @@
+parent kevlar 1_00_00
+defaultqual e10
+
+# Defaults:
+# incdir  product_dir  include
+# fcldir  product_dir  fcl
+# libdir  fq_dir       lib
+# bindir  fq_dir       bin
+# gdmldir -  
+# fwdir   -  
+#
+incdir	product_dir	include
+libdir	fq_dir		lib
+bindir	fq_dir		bin
+flcdir  product_dir     fcl
+
+# With "product  version" table below, we now define depdendencies
+# Add the dependent product and version
+
+product          version
+kevlar v1_00_00
+boost  v1_61_0
+hdf5   v01_00_00
+larsim v06_10_03
+gcc		 v4_9_3a
+cetbuildtools   v5_06_01       -       only_for_build
+end_product_list
+
+# We now define allowed qualifiers and the corresponding qualifiers for the dependencies.
+# Make a table by adding columns before "notes". 
+qualifier	larsim	  hdf5 	    boost     gcc	 notes
+e10:debug	e10:debug	e10:debug e10:debug -nq-
+e10:opt		e10:opt		e10:opt   e10:opt   -nq-
+e10:prof	e10:prof	e10:prof  e10:prof  -nq-
+end_qualifier_list
+
+# Preserve tabs and formatting in emacs and vi / vim:
+
+### Local Variables:
+### tab-width: 8
+### End:
