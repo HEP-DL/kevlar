@@ -6,8 +6,6 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
 
-#include "H5Cpp.h"
-
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -16,7 +14,15 @@ namespace kevlar{
 
   HDF5Image::HDF5Image(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","largeant"))
+      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
+      fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
+      fDims{
+        pSet.get<uint32_t>("ImageWidth",6000),
+        pSet.get<uint32_t>("ImageHeight",9600),
+        pSet.get<uint32_t>("NChannels",3)
+      },
+      fDataSpace(HDF5Image_RANK, fDims),
+      fDataSet(NULL);
   {
 
   }
@@ -47,9 +53,11 @@ namespace kevlar{
       std::cout<<std::endl;
     }
   }
-  void HDF5Image::beginSubRun(art::SubRun const & sr)
+  void HDF5Image::beginSubRun(art::SubRun const &)
   {
-
+    art::ServiceHandle<kevlar::H5File> _OutputFile;
+    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,
+      this->fDataSpace);
   }
   void HDF5Image::endSubRun(art::SubRun const & sr)
   {

@@ -1,5 +1,6 @@
 #include "kevlar/Services/HDF5File.hh"
 
+#include <stringstream>
 
 
 namespace kevlar{
@@ -20,9 +21,9 @@ namespace kevlar{
     H5::DataSpace& space,
     H5::DSetCreatPropList& plist)
   {
-    H5::DataSet* data = new H5::DataSet(this->fOutput.createDataSet(name, 
+    H5::DataSet* data = new H5::DataSet(this->fOutput->createDataSet(name, 
                                 H5::PredType::NATIVE_INT,
-                                space, plist) );
+                                space) );
     this->fDataSets.push_back(data);
     return data;
   }

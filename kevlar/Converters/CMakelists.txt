@@ -3,13 +3,13 @@ include_directories( $ENV{NUTOOLS_INC} )
 
 #HDF5 Image Converter
 simple_plugin( HDF5Image module
-    HDF5_SERVICE
+    ${HDF5FILE_SERVICE}
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     larcore_Geometry
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
-    hdf5
+    ${HDF5_LIBRARIES}
   BASENAME_ONLY
 )
 

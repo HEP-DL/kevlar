@@ -4,9 +4,13 @@
 #ifndef HDF5Image_hh
 #define HDF5Image_hh
 
+#define HDF5Image_RANK 3
+
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include <string>
+
+#include "H5Cpp.h"
 
 namespace fhicl{
   class ParameterSet;
@@ -19,9 +23,10 @@ namespace art{
 namespace kevlar{
   class HDF5Image : public art::EDAnalyzer {
     std::string fProducerName;
-    std::string fOutFileName;
     std::string fDataSetName;
-    //H5::H5File fH5Output;
+    hsize_t fDims[HDF5Image_RANK];
+    H5::DataSpace fDataSpace;
+    H5::DataSet* fDataSet;
   public:
     HDF5Image(::fhicl::ParameterSet const& );
     ~HDF5Image();
