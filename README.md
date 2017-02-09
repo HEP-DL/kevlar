@@ -2,7 +2,7 @@
 
 It's dangerous to interface directly with LArSoft alone. Bring this Kevlar vest.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Contents
 
