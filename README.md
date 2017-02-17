@@ -6,9 +6,6 @@ This Kevlar material is designed to provide an interface to software *external* 
 
 ## Contents
 
-* Analyzers
-  * NeutronScanner
-    * This is designed to fetch information out on neutrons in MCParticles
 * Converters
   * HDF5Image
     * Converts RawDigits to HDF5 Image format
