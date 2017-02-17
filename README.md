@@ -63,8 +63,8 @@ mrbslp
 
 ### Usage
 
-Typcial larsoft invocation
+Typcial larsoft invocation:
 
 ~~~ bash
-lar -c neutron_scanner.fcl -s <your input root file>
+lar -c converter.fcl -s <your input root file>
 ~~~
