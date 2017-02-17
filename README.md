@@ -1,6 +1,6 @@
 # Kevlar
 
-It's dangerous to interface directly with LArSoft alone. Bring this Kevlar vest.
+This Kevlar material is designed to provide an interface to software *external* to LArSoft by providing a data format interface layer. Currently, the only format supported is HDF5, but this is planned to be extended to other data formats.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
