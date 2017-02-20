@@ -6,6 +6,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <boost/multi_array.hpp>
