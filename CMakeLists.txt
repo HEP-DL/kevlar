@@ -46,10 +46,10 @@ find_ups_product( cetbuildtools v4_14_01 )
 find_ups_product( hdf5 v01_00_00 )
 find_ups_product( boost v1_00_00 )
 #do the extra hdf5 step
-cet_find_library( hdf5 NAMES hdf5_debug PATHS ${HDF5_SEARCH_PATH}/lib NO_DEFAULT_PATH  )
-cet_find_library( hdf5_cpp NAMES hdf5_cpp_debug PATHS ${HDF5_SEARCH_PATH}/lib NO_DEFAULT_PATH  )
-cet_find_library( hdf5_hl NAMES hdf5_hl_debug PATHS ${HDF5_SEARCH_PATH}/lib NO_DEFAULT_PATH  )
-cet_find_library( hdf5_tools NAMES hdf5_tools_debug PATHS ${HDF5_SEARCH_PATH}/lib NO_DEFAULT_PATH  )
+cet_find_library( hdf5 NAMES hdf5_debug PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
+cet_find_library( hdf5_cpp NAMES hdf5_cpp_debug PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
+cet_find_library( hdf5_hl NAMES hdf5_hl_debug PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
+cet_find_library( hdf5_tools NAMES hdf5_tools_debug PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
 set(HDF5_LIBRARIES ${hdf5} ${hdf5_cpp} ${hdf5_hl} ${hdf5_tools} )
 
 # macros for dictionary and simple_plugin

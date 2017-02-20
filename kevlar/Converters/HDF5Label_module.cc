@@ -6,6 +6,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <boost/multi_array.hpp>
 
@@ -46,11 +47,31 @@ namespace kevlar{
 
   void HDF5Label::analyze(art::Event const & evt)
   {
-    boost::multi_array<double, 3>  _image(boost::extents[this->fLabels.size()]);
-    art::Handle<std::vector<simb::MCTruth> > digits;
+    boost::multi_array<double, 3>  _label_vector(boost::extents[this->fLabels.size()]);
+    
+    art::Handle< std::vector< simb::MCTruth > > mct_handle;
+
+    evt.getByLabel(fProducerName, mct_handle);
+    for (auto truth: *mct_handle){
+      for(unsigned i=0; i<truth.NParticles(); ++i){
+        uint32_t pdg = mct_handle.GetParticle(i).PdgCode();
+        std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
+
+        auto index = std::find(fLabels.begin(), fLabels.end(), name);
+        if(index<= fLabels.size()){
+
+        }
+        else{
+        }
+      }
+    }
 
 
-    evt.getByLabel(fProducerName, digits);
+
+
+
+
+
     for (auto digitContainer: *digits){
       auto waveform = digitContainer.ADCs();
       auto channel = digitContainer.Channel();
