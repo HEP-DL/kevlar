@@ -15,4 +15,9 @@ tpc_image: {
   fFillValue: 0
 }
 
+particle_labels:{
+  module_type: "HDF5Label"
+  labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+"]
+}
+
 END_PROLOG
