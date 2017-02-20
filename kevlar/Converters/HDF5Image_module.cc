@@ -19,7 +19,7 @@ namespace kevlar{
   HDF5Image::HDF5Image(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
-      fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
+      fDataSetName(pSet.get<std::string>("DataSetLabel","image/rawdigits")),
       fDims{
         H5S_UNLIMITED,
         pSet.get<uint32_t>("NChannels",3),
@@ -49,9 +49,7 @@ namespace kevlar{
 
   void HDF5Image::analyze(art::Event const & evt)
   {
-    //Create the dataset
     boost::multi_array<double, 3>  _image(boost::extents[3][9600][6000]);
-    //now write things into the data set;
     art::Handle<std::vector<raw::RawDigit> > digits;
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){

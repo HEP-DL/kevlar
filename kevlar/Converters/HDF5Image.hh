@@ -23,7 +23,7 @@ namespace kevlar{
     std::string fProducerName;
     std::string fDataSetName;
     hsize_t fDims[4];// Dataset dimensions
-    hsize_t fChunkDims[4];
+    hsize_t fChunkDims[4];// Chunk Dimensions
     H5::DataSpace fDataSpace;/// Buffer
     H5::DSetCreatPropList fParms;// IO Parameters
     H5::DataSet* fDataSet;// points at dataset
