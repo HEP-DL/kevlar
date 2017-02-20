@@ -30,8 +30,8 @@ namespace kevlar{
     int fFillValue;
     uint32_t fNEvents;
   public:
-    HDF5Image(::fhicl::ParameterSet const& );
-    ~HDF5Image();
+    HDF5Label(::fhicl::ParameterSet const& );
+    ~HDF5Label();
     void analyze(::art::Event const&) override;
     void beginSubRun(::art::SubRun const&) override;
     void endSubRun(::art::SubRun const&) override;
