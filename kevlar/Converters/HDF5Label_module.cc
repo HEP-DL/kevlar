@@ -59,47 +59,17 @@ namespace kevlar{
 
         auto index = std::find(fLabels.begin(), fLabels.end(), name);
         if(index<= fLabels.size()){
-
+          _label_vector[index]++;
         }
         else{
+          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;          
         }
       }
     }
 
-
-
-
-
-
-
-    for (auto digitContainer: *digits){
-      auto waveform = digitContainer.ADCs();
-      auto channel = digitContainer.Channel();
-      art::ServiceHandle<geo::Geometry> geo;
-      auto wire = geo->ChannelToWire(channel).at(0).Wire;
-      auto plane = geo->ChannelToWire(channel).at(0).Plane;
-
-      std::cout<<plane<<","<<wire<<std::endl<<"\t";
-      uint32_t tick=0;
-      for(auto code: waveform){
-        std::cout<<"("<<tick<<","<<code<<"),";
-
-        if(plane>=fDims[0] || tick>=fDims[1] || wire>=fDims[2]){
-          std::cout<<"DIMENSIONS OUT OF ALIGNMENT: "<<std::endl;
-          std::cout<<"("<<plane<<','<<tick<<','<<wire<<")"<<">=";
-          std::cout<<"("<<fDims[0]<<','<<fDims[1]<<','<<fDims[2]<<")";
-          tick++;
-          continue;
-        }
-        _image[plane][tick][wire] = code;
-        ++tick;
-      }
-      std::cout<<std::endl;
-    }
-
-    hsize_t offset[4]={this->fNEvents,0,0,0};
+    hsize_t offset[2]={this->fNEvents,0};
     this->fDataSpace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-    this->fDataSet->write( _image.data(), H5::PredType::NATIVE_INT, this->fDataSpace, this->fDataSpace );
+    this->fDataSet->write( _label_vector.data(), H5::PredType::NATIVE_INT, this->fDataSpace, this->fDataSpace );
     ++(this->fNEvents);
   }
   void HDF5Label::beginSubRun(art::SubRun const &)
@@ -113,6 +83,4 @@ namespace kevlar{
   {
 
   }
-
-
 }
