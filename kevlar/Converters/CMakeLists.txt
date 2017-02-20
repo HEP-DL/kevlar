@@ -21,6 +21,7 @@ simple_plugin( HDF5Label module
     larcore_Geometry
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
+    ${ROOT_EG}
     ${HDF5_LIBRARIES}
   BASENAME_ONLY
 )

@@ -8,12 +8,14 @@
 #include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "TDatabasePDG.h"
 
 #include <boost/multi_array.hpp>
 
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 
 namespace kevlar{
@@ -48,19 +50,19 @@ namespace kevlar{
 
   void HDF5Label::analyze(art::Event const & evt)
   {
-    boost::multi_array<double, 3>  _label_vector(boost::extents[this->fLabels.size()]);
+    boost::multi_array<double, 1>  _label_vector(boost::extents[this->fLabels.size()]);
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
 
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle){
-      for(unsigned i=0; i<truth.NParticles(); ++i){
-        uint32_t pdg = mct_handle.GetParticle(i).PdgCode();
+      for(int i=0; i<truth.NParticles(); ++i){
+        int pdg = truth.GetParticle(i).PdgCode();
         std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
 
-        auto index = std::find(fLabels.begin(), fLabels.end(), name);
-        if(index<= fLabels.size()){
-          _label_vector[index]++;
+        ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
+        if(index < int(fLabels.size()) ){
+          _label_vector[index] = _label_vector[index] + 1;
         }
         else{
           std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;          
