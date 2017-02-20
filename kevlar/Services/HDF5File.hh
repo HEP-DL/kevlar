@@ -25,6 +25,6 @@ namespace kevlar{
   };
 }
 
-DECLARE_ART_SERVICE(kevlar::HDF5File)
+DECLARE_ART_SERVICE(kevlar::HDF5File, LEGACY)
 
 #endif // HDF5FILE_HH
