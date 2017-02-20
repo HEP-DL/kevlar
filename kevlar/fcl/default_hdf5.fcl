@@ -11,13 +11,17 @@ tpc_image: {
   ImageHeight: 9600
   ImageWidth: 3600
   NChannels: 3
-  ChunkSize: 10
+  ChunkSize: 1
   fFillValue: 0
 }
 
 particle_labels:{
   module_type: "HDF5Label"
   labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+"]
+  ProducerLabel: "largeant"
+  DataSetLabel: "label/type"
+  ChunkSize: 1
+  FillValue: 0
 }
 
 END_PROLOG

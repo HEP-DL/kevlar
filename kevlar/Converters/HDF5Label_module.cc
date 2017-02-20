@@ -30,7 +30,7 @@ namespace kevlar{
         fLabels.size(),
       },
       fChunkDims{
-        pSet.get<uint32_t>("ChunkSize",10),
+        pSet.get<uint32_t>("ChunkSize",1),
         fLabels.size()
       },
       fDataSpace(2, fDims),
