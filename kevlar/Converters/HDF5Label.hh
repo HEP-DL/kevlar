@@ -41,6 +41,3 @@ namespace kevlar{
 
 DEFINE_ART_MODULE(kevlar::HDF5Label)
 #endif // HDF5LABEL_HH
-
-
-#endif //HDF5Image_hh
