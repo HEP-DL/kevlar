@@ -26,7 +26,6 @@ namespace kevlar{
   class HDF5File {
     H5::H5File fOutput;
     std::vector<H5::DataSet*> fDataSets;
-    std::vector<H5::Group*> fGroups;
   public:
     HDF5File(fhicl::ParameterSet const&, art::ActivityRegistry&);
     ~HDF5File();

@@ -25,14 +25,13 @@ namespace kevlar{
   }
 
   H5::Group HDF5File::GetGroup(std::string& name){
-    for(auto group: this->fGroups){
-      if( std::string(group->getLinkval(".")) == name ){
-        return *group;
-      }
+    try{
+      return this->fOutput.createGroup(name);
     }
-    auto group = this->fOutput.createGroup(name);
-    this->fGroups.push_back(&group);
-    return group;
+    catch(const std::exception& e){
+      return this->fOutput.getGroup(name);
+    }
+    return this->fOutput.getGroup(name);
   }
 
   H5::DataSet* HDF5File::CreateDataSet(std::string& name,  std::string& group_name,

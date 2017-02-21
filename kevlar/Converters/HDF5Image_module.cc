@@ -19,7 +19,7 @@ namespace kevlar{
   HDF5Image::HDF5Image(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
-      fDataSetName(pSet.get<std::string>("DataSetLabel","image/rawdigits")),
+      fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
       fDims{
         pSet.get<uint32_t>("ChunkSize",1),
         pSet.get<uint32_t>("NChannels",3),

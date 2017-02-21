@@ -23,19 +23,16 @@ namespace kevlar{
   HDF5Label::HDF5Label(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
-      fDataSetName(pSet.get<std::string>("DataSetLabel","label/type")),
+      fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
-        pSet.get<uint32_t>("ChunkSize",1),
-        fLabels.size(),
+        pSet.get<uint32_t>("ChunkSize",1), fLabels.size(),
       },
       fMaxDims{
-        H5S_UNLIMITED,
-        fLabels.size(),
+        H5S_UNLIMITED, fLabels.size(),
       },
       fChunkDims{
-        pSet.get<uint32_t>("ChunkSize",1),
-        fLabels.size()
+        pSet.get<uint32_t>("ChunkSize",1), fLabels.size()
       },
       fDataSpace(2, fDims, fMaxDims),
       fParms(),
