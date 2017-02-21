@@ -1,0 +1,27 @@
+BEGIN_PROLOG
+
+hdf5_file_service: {
+  FILENAME: "output.h5"
+}
+
+tpc_image: {
+  module_type: "HDF5Image"
+  ProducerLabel: "largeant"
+  DataSetLabel: "rawdigits"
+  ImageHeight: 9600
+  ImageWidth: 3600
+  NChannels: 3
+  ChunkSize: 1
+  fFillValue: 0
+}
+
+particle_labels:{
+  module_type: "HDF5Label"
+  labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+"]
+  ProducerLabel: "largeant"
+  DataSetLabel: "label/type"
+  ChunkSize: 1
+  FillValue: 0
+}
+
+END_PROLOG

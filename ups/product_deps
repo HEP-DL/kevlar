@@ -21,7 +21,7 @@ product          version
 kevlar v1_00_00
 boost  v1_61_0
 hdf5   v01_00_00
-larsim v06_10_03
+larsim v06_13_00
 gcc		 v4_9_3a
 cetbuildtools   v5_06_01       -       only_for_build
 end_product_list

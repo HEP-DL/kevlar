@@ -1,0 +1,21 @@
+#include "default_hdf5.fcl"
+
+process_name: HDF5Converter
+
+services: {
+  HDF5File: @local::hdf5_file_service
+}
+
+source: {
+  module_type: RootInput
+  maxEvents:  -1
+}
+
+physics: {
+  analyzers: {
+    tpc_image: @local::tpc_image
+  }
+  ana: [tpc_image]
+  end_paths: [ana]
+}
+  
