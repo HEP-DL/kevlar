@@ -20,7 +20,7 @@ namespace kevlar{
     H5::DataSpace& space,
     H5::DSetCreatPropList& plist)
   {
-    H5::DataSet* data = new H5::DataSet(this->fOutput.createDataSet(name, 
+    H5::DataSet* data = new H5::DataSet(this->fOutput.createDataSet(name.c_str(), 
                                 H5::PredType::NATIVE_INT,
                                 space, plist) );
     this->fDataSets.push_back(data);

@@ -90,6 +90,5 @@ namespace kevlar{
   }
   void HDF5Label::endSubRun(art::SubRun const & sr)
   {
-
   }
 }

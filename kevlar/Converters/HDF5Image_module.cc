@@ -99,6 +99,5 @@ namespace kevlar{
   }
   void HDF5Image::endSubRun(art::SubRun const & sr)
   {
-
   }
 }
