@@ -26,6 +26,10 @@ namespace kevlar{
       fDataSetName(pSet.get<std::string>("DataSetLabel","label/type")),
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
+        pSet.get<uint32_t>("ChunkSize",1),
+        fLabels.size(),
+      },
+      fMaxDims{
         H5S_UNLIMITED,
         fLabels.size(),
       },
@@ -33,7 +37,7 @@ namespace kevlar{
         pSet.get<uint32_t>("ChunkSize",1),
         fLabels.size()
       },
-      fDataSpace(2, fDims),
+      fDataSpace(2, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
@@ -72,6 +76,7 @@ namespace kevlar{
 
     hsize_t offset[2]={this->fNEvents,0};
     this->fDataSpace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+    this->fDataSpace.extend({this->fNEvents+1,0});
     this->fDataSet->write( _label_vector.data(), H5::PredType::NATIVE_INT, this->fDataSpace, this->fDataSpace );
     ++(this->fNEvents);
   }
