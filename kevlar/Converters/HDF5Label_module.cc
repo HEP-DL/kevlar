@@ -76,7 +76,7 @@ namespace kevlar{
 
     hsize_t offset[2]={this->fNEvents,0};
     this->fDataSpace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-    this->fDataSpace.extend({this->fNEvents+1,0});
+    //this->fDataSpace.extend({this->fNEvents+1,0});
     this->fDataSet->write( _label_vector.data(), H5::PredType::NATIVE_INT, this->fDataSpace, this->fDataSpace );
     ++(this->fNEvents);
   }
