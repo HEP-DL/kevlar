@@ -83,10 +83,10 @@ namespace kevlar{
       std::cout<<std::endl;
     }
 
-    DataSpace filespace(this->fDataSpace->getSpace ());
+    H5::DataSpace filespace(this->fDataSet->getSpace ());
     hsize_t offset[4]={this->fNEvents,0,0,0};
     filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-    DataSpace memspace(4, fChunkDims, NULL);
+    H5::DataSpace memspace(4, fChunkDims, NULL);
     this->fDataSet->write( _image.data(), H5::PredType::NATIVE_INT, memspace, filespace );
     ++(this->fNEvents);
   }
