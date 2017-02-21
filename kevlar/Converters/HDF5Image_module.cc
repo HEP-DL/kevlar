@@ -55,7 +55,7 @@ namespace kevlar{
 
   void HDF5Image::analyze(art::Event const & evt)
   {
-    boost::multi_array<int, 3>  _image(boost::extents[3][9600][6000]);
+    boost::multi_array<int, 3>  _image(boost::extents[fDims[1]][fDims[2]][fDims[3]]);
     art::Handle<std::vector<raw::RawDigit> > digits;
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){
@@ -68,12 +68,12 @@ namespace kevlar{
       std::cout<<plane<<","<<wire<<std::endl<<"\t";
       uint32_t tick=0;
       for(auto code: waveform){
-        std::cout<<"("<<tick<<","<<code<<"),";
 
-        if(plane>=fDims[0] || tick>=fDims[1] || wire>=fDims[2]){
+        if(plane>=fDims[1] || tick>=fDims[2] || wire>=fDims[3]){
           std::cout<<"DIMENSIONS OUT OF ALIGNMENT: "<<std::endl;
           std::cout<<"("<<plane<<','<<tick<<','<<wire<<")"<<">=";
           std::cout<<"("<<fDims[0]<<','<<fDims[1]<<','<<fDims[2]<<")";
+          std::cout<<std::endl;
           tick++;
           continue;
         }
@@ -93,7 +93,8 @@ namespace kevlar{
   void HDF5Image::beginSubRun(art::SubRun const &)
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,
+    std::string group_name = "image";
+    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
   }

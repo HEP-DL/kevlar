@@ -84,7 +84,8 @@ namespace kevlar{
   void HDF5Label::beginSubRun(art::SubRun const &)
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,
+    std::string group_name = "label";
+    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
   }
