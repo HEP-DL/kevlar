@@ -21,6 +21,12 @@ namespace kevlar{
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","image/rawdigits")),
       fDims{
+        pSet.get<uint32_t>("ChunkSize",1),
+        pSet.get<uint32_t>("NChannels",3),
+        pSet.get<uint32_t>("ImageHeight",9600),
+        pSet.get<uint32_t>("ImageWidth",6000),
+      },
+      fMaxDims{
         H5S_UNLIMITED,
         pSet.get<uint32_t>("NChannels",3),
         pSet.get<uint32_t>("ImageHeight",9600),
@@ -32,7 +38,7 @@ namespace kevlar{
         pSet.get<uint32_t>("ImageHeight",9600),
         pSet.get<uint32_t>("ImageWidth",6000),        
       },
-      fDataSpace(4, fDims),
+      fDataSpace(4, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
