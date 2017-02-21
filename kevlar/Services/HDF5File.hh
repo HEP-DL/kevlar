@@ -1,6 +1,7 @@
 #ifndef HDF5FILE_HH
 #define HDF5FILE_HH
 
+
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "H5Cpp.h"
 #include <string>
@@ -13,12 +14,20 @@ namespace H5{
   class DSetCreatePropList;
 }
 
+namespace art{
+  class ActivityRegistry;
+}
+
+namespace fhicl{
+  class ParameterSet;
+}
+
 namespace kevlar{
   class HDF5File {
     H5::H5File fOutput;
     std::vector<H5::DataSet*> fDataSets;
   public:
-    HDF5File(fhicl::ParameterSet const&);
+    HDF5File(fhicl::ParameterSet const&, art::ActivityRegistry&);
     ~HDF5File();
     H5::DataSet* CreateDataSet(std::string& name, H5::DataSpace& space,
       H5::DSetCreatPropList& plist);

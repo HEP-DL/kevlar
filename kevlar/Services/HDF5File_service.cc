@@ -1,9 +1,10 @@
 #include "kevlar/Services/HDF5File.hh"
-
+#include "fhiclcpp/ParameterSet.h"
+#include "art/Framework/Services/Registry/ActivityRegistry.h"
 
 namespace kevlar{
 
-  HDF5File::HDF5File(fhicl::ParameterSet const& pset):
+  HDF5File::HDF5File(fhicl::ParameterSet const& pset, art::ActivityRegistry&):
     fOutput(pset.get<std::string>("FileName","output.h5"),H5F_ACC_TRUNC),
     fDataSets()
   {
@@ -26,3 +27,4 @@ namespace kevlar{
     return data;
   }
 }
+DEFINE_ART_SERVICE(kevlar::HDF5File)
