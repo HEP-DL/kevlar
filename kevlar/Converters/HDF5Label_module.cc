@@ -54,7 +54,7 @@ namespace kevlar{
 
   void HDF5Label::analyze(art::Event const & evt)
   {
-    boost::multi_array<double, 1>  _label_vector(boost::extents[this->fLabels.size()]);
+    boost::multi_array<int, 1>  _label_vector(boost::extents[this->fLabels.size()]);
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
 

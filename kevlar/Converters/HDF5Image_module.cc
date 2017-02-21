@@ -55,7 +55,7 @@ namespace kevlar{
 
   void HDF5Image::analyze(art::Event const & evt)
   {
-    boost::multi_array<double, 3>  _image(boost::extents[3][9600][6000]);
+    boost::multi_array<int, 3>  _image(boost::extents[3][9600][6000]);
     art::Handle<std::vector<raw::RawDigit> > digits;
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){
