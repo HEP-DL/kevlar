@@ -5,7 +5,7 @@
 namespace kevlar{
 
   HDF5File::HDF5File(fhicl::ParameterSet const& pset, art::ActivityRegistry&):
-    fOutput(pset.get<std::string>("FileName","output.h5"),H5F_ACC_TRUNC),
+    fOutput(pset.get<std::string>("FileName","output.h5"),H5F_ACC_TRUNC | H5F_ACC_DEBUG | H5F_ACC_RDWR),
     fDataSets()
   {
 
