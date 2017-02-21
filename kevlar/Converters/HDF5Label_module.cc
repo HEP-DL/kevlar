@@ -43,7 +43,7 @@ namespace kevlar{
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
       fNEvents(0)
   {
-      fParms.setChunk( 4, fChunkDims );
+      fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
   }
 
