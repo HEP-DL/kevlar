@@ -42,6 +42,7 @@ namespace kevlar{
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
+      fParms.setDeflate(6);
   }
 
   HDF5Label::~HDF5Label()

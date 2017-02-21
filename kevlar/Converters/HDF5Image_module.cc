@@ -46,6 +46,7 @@ namespace kevlar{
   {
       fParms.setChunk( 4, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
+      fParms.setDeflate(6);
   }
 
   HDF5Image::~HDF5Image()
@@ -64,8 +65,6 @@ namespace kevlar{
       art::ServiceHandle<geo::Geometry> geo;
       auto wire = geo->ChannelToWire(channel).at(0).Wire;
       auto plane = geo->ChannelToWire(channel).at(0).Plane;
-
-      std::cout<<plane<<","<<wire<<std::endl<<"\t";
       uint32_t tick=0;
       for(auto code: waveform){
 
