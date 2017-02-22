@@ -42,7 +42,7 @@ namespace kevlar{
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(6);
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",7));
   }
 
   HDF5Label::~HDF5Label()
@@ -63,7 +63,7 @@ namespace kevlar{
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
         if(index < int(fLabels.size()) ){
-          fBuffer[index] = fBuffer[index] + 1;
+          fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
         }
         else{
           std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;          

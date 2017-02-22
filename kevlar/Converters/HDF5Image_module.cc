@@ -48,7 +48,7 @@ namespace kevlar{
   {
       fParms.setChunk( 4, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(6);
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",7));
   }
 
   HDF5Image::~HDF5Image()
@@ -78,7 +78,7 @@ namespace kevlar{
           tick++;
           continue;
         }
-        _image[fBufferCounter][plane][tick][wire] = code;
+        fBuffer[fBufferCounter][plane][tick][wire] = code;
         ++tick;
       }
       std::cout<<std::endl;
