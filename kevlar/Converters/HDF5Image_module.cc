@@ -7,7 +7,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
 
-#include <boost/multi_array.hpp>
+
 
 #include <fstream>
 #include <string>
@@ -24,25 +24,27 @@ namespace kevlar{
         pSet.get<uint32_t>("ChunkSize",1),
         pSet.get<uint32_t>("NChannels",3),
         pSet.get<uint32_t>("ImageHeight",9600),
-        pSet.get<uint32_t>("ImageWidth",6000),
+        pSet.get<uint32_t>("ImageWidth",3456),
       },
       fMaxDims{
         H5S_UNLIMITED,
         pSet.get<uint32_t>("NChannels",3),
         pSet.get<uint32_t>("ImageHeight",9600),
-        pSet.get<uint32_t>("ImageWidth",6000),
+        pSet.get<uint32_t>("ImageWidth",3456),
       },
       fChunkDims{
         pSet.get<uint32_t>("ChunkSize",1),
         pSet.get<uint32_t>("NChannels",3),
         pSet.get<uint32_t>("ImageHeight",9600),
-        pSet.get<uint32_t>("ImageWidth",6000),        
+        pSet.get<uint32_t>("ImageWidth",3456),        
       },
       fDataSpace(4, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
-      fNEvents(0)
+      fNEvents(0),
+      fBuffer(boost::extents[fChunkDims[0]][fChunkDims[1]][fChunkDims[2]][fChunkDims[3]]),
+      fBufferCounter(0)
   {
       fParms.setChunk( 4, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
@@ -56,7 +58,7 @@ namespace kevlar{
 
   void HDF5Image::analyze(art::Event const & evt)
   {
-    boost::multi_array<int, 3>  _image(boost::extents[fDims[1]][fDims[2]][fDims[3]]);
+
     art::Handle<std::vector<raw::RawDigit> > digits;
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){
@@ -76,20 +78,26 @@ namespace kevlar{
           tick++;
           continue;
         }
-        _image[plane][tick][wire] = code;
+        _image[fBufferCounter][plane][tick][wire] = code;
         ++tick;
       }
       std::cout<<std::endl;
     }
 
-    hsize_t newSize[4] = {this->fNEvents+1,fDims[1],fDims[2],fDims[3]};
+    ++(this->fBufferCounter);
 
-    this->fDataSet->extend( newSize );
-    H5::DataSpace filespace(this->fDataSet->getSpace());
-    hsize_t offset[4]={this->fNEvents,0,0,0};
-    filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-    H5::DataSpace memspace(4, fChunkDims, NULL);
-    this->fDataSet->write( _image.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+    if (this->fBufferCounter == this->fChunkDims[0]){
+      hsize_t newSize[4] = {this->fNEvents+1,fDims[1],fDims[2],fDims[3]};
+      this->fDataSet->extend( newSize );
+      H5::DataSpace filespace(this->fDataSet->getSpace());
+      hsize_t offset[4]={this->fNEvents-fChunkDims[0]+1,0,0,0};
+      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+      H5::DataSpace memspace(4, fChunkDims, NULL);
+      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+      this->fBufferCounter=0;
+      fBuffer = boost::multi_array<int, 4>(boost::extents[fChunkDims[0]][fChunkDims[1]][fChunkDims[2]][fChunkDims[3]]);
+    }
+
     ++(this->fNEvents);
   }
   void HDF5Image::beginSubRun(art::SubRun const &)
@@ -102,5 +110,15 @@ namespace kevlar{
   }
   void HDF5Image::endSubRun(art::SubRun const & sr)
   {
+    if(!(this->fBufferCounter==0)){
+      hsize_t newSize[4] = {this->fNEvents+1,fDims[1],fDims[2],fDims[3]};
+      this->fDataSet->extend( newSize );
+      H5::DataSpace filespace(this->fDataSet->getSpace());
+      hsize_t offset[4]={this->fNEvents-fBufferCounter,0,0,0};
+      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+      H5::DataSpace memspace(4, fChunkDims, NULL);
+      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+      this->fBufferCounter=0;
+    }
   }
 }

@@ -3,13 +3,17 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include <boost/multi_array.hpp>
 #include "H5Cpp.h"
 #include <string>
 #include <vector>
 
+
 namespace fhicl{
   class ParameterSet;
 }
+
+
 namespace art{
   class Event;
   class SubRun;  
@@ -17,6 +21,7 @@ namespace art{
 
 
 namespace kevlar{
+
   class HDF5Label : public art::EDAnalyzer {
     std::string fProducerName;
     std::string fDataSetName;
@@ -29,6 +34,8 @@ namespace kevlar{
     H5::DataSet* fDataSet;// points at dataset
     int fFillValue;
     uint32_t fNEvents;
+    boost::multi_array<int, 2>  fBuffer;
+    uint32_t fBufferCounter;
   public:
     HDF5Label(::fhicl::ParameterSet const& );
     ~HDF5Label();
