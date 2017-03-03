@@ -114,8 +114,9 @@ namespace kevlar{
       this->fDataSet->extend( newSize );
       H5::DataSpace filespace(this->fDataSet->getSpace());
       hsize_t offset[4]={this->fNEvents-fBufferCounter,0,0,0};
-      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-      H5::DataSpace memspace(4, fChunkDims, NULL);
+      hsize_t leftover_size[4] = {this->fBufferCounter, fChunkDims[1],fChunkDims[2],fChunkDims[3]};
+      filespace.selectHyperslab( H5S_SELECT_SET, leftover_size, offset );
+      H5::DataSpace memspace(4, leftover_size, NULL);
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
       this->fBufferCounter=0;
     }
