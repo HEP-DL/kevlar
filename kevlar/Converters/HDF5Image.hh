@@ -6,9 +6,9 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include <string>
-
+#include <boost/multi_array.hpp>
 #include "H5Cpp.h"
+#include <string>
 
 namespace fhicl{
   class ParameterSet;
@@ -30,6 +30,9 @@ namespace kevlar{
     H5::DataSet* fDataSet;// points at dataset
     int fFillValue;
     uint32_t fNEvents;
+    boost::multi_array<int, 4>  fBuffer;
+    uint32_t fBufferCounter;
+
   public:
     HDF5Image(::fhicl::ParameterSet const& );
     ~HDF5Image();

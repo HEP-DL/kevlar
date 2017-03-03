@@ -10,8 +10,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "TDatabasePDG.h"
 
-#include <boost/multi_array.hpp>
-
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -38,10 +36,13 @@ namespace kevlar{
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
-      fNEvents(0)
+      fNEvents(0),
+      fBuffer(boost::extents[fChunkDims[0]][fChunkDims[1]]),
+      fBufferCounter(0)
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",7));
   }
 
   HDF5Label::~HDF5Label()
@@ -51,7 +52,6 @@ namespace kevlar{
 
   void HDF5Label::analyze(art::Event const & evt)
   {
-    boost::multi_array<int, 1>  _label_vector(boost::extents[this->fLabels.size()]);
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
 
@@ -63,22 +63,31 @@ namespace kevlar{
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
         if(index < int(fLabels.size()) ){
-          _label_vector[index] = _label_vector[index] + 1;
+          fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
         }
         else{
           std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;          
         }
       }
     }
+    ++(this->fBufferCounter);
 
-    dataset->extend({this->fNEvents+1,fDims[1]});
-    H5::DataSpace filespace(this->fDataSet->getSpace());
-    hsize_t offset[2]={this->fNEvents,0};
-    filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-    H5::DataSpace memspace(2, fChunkDims, NULL);
-    this->fDataSet->write( _label_vector.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+    if (this->fBufferCounter == this->fChunkDims[0]){
+      hsize_t newSize[2] = {this->fNEvents+1,fDims[1]};
+      this->fDataSet->extend( newSize );
+      H5::DataSpace filespace(this->fDataSet->getSpace());
+      hsize_t offset[2]={this->fNEvents-fChunkDims[0],0};
+      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+      H5::DataSpace memspace(2, fChunkDims, NULL);
+      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+      this->fBufferCounter=0;
+      fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
+    }
+
     ++(this->fNEvents);
+
   }
+  
   void HDF5Label::beginSubRun(art::SubRun const &)
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
@@ -87,7 +96,18 @@ namespace kevlar{
       this->fDataSpace,
       this->fParms);
   }
+
   void HDF5Label::endSubRun(art::SubRun const & sr)
   {
+    if(!(this->fBufferCounter==0)){
+      hsize_t newSize[2] = {this->fNEvents+1,fDims[1]};
+      this->fDataSet->extend( newSize );
+      H5::DataSpace filespace(this->fDataSet->getSpace());
+      hsize_t offset[2]={this->fNEvents-fBufferCounter,0};
+      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
+      H5::DataSpace memspace(4, fChunkDims, NULL);
+      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+      this->fBufferCounter=0;
+    }
   }
 }
