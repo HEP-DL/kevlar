@@ -76,7 +76,7 @@ namespace kevlar{
           tick++;
           continue;
         }
-        fBuffer[fBufferCounter][plane][tick][wire] = code;
+        fBuffer[fBufferCounter][plane][tick][wire] = int(code) ;
         ++tick;
       }
     }
@@ -110,7 +110,7 @@ namespace kevlar{
   void HDF5Image::endSubRun(art::SubRun const & sr)
   {
     if(!(this->fBufferCounter==0)){
-      hsize_t newSize[4] = {this->fNEvents+1,fDims[1],fDims[2],fDims[3]};
+      hsize_t newSize[4] = {this->fNEvents,fDims[1],fDims[2],fDims[3]};
       this->fDataSet->extend( newSize );
       H5::DataSpace filespace(this->fDataSet->getSpace());
       hsize_t offset[4]={this->fNEvents-fBufferCounter,0,0,0};

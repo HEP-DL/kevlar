@@ -100,7 +100,7 @@ namespace kevlar{
   void HDF5Label::endSubRun(art::SubRun const & sr)
   {
     if(!(this->fBufferCounter==0)){
-      hsize_t newSize[2] = {this->fNEvents+1,fDims[1]};
+      hsize_t newSize[2] = {this->fNEvents,fDims[1]};
       this->fDataSet->extend( newSize );
       H5::DataSpace filespace(this->fDataSet->getSpace());
       hsize_t offset[2]={this->fNEvents-fBufferCounter,0};

@@ -12,7 +12,8 @@ namespace kevlar{
   {
     // Setting up H5 to not print exceptions allows the group creation
     // Pattern to function without vomiting all over the terminal output
-    H5::Exception::dontPrint();
+    if(! pset.get<bool>("PrintErrors", true) )
+      H5::Exception::dontPrint();
   }
 
   HDF5File::~HDF5File()
