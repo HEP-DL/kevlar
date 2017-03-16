@@ -1,22 +1,26 @@
 BEGIN_PROLOG
 
-tpcimage: {
+hdf5FileService: {
+  FILENAME: "output.h5"
+}
+
+tpcImage: {
   module_type: "HDF5Image"
-  ProducerLabel: "largeant"
+  ProducerLabel: "daq"
   DataSetLabel: "rawdigits"
   ImageHeight: 9600
   ImageWidth: 3600
   NChannels: 3
-  ChunkSize: 1
+  ChunkSize: 10
   fFillValue: 0
 }
 
-particlelabels:{
+particleLabels:{
   module_type: "HDF5Label"
-  labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+"]
+  labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+","k+"]
   ProducerLabel: "largeant"
-  DataSetLabel: "label/type"
-  ChunkSize: 1
+  DataSetLabel: "type"
+  ChunkSize: 10
   FillValue: 0
 }
 

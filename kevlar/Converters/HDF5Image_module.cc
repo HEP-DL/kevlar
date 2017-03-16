@@ -16,7 +16,7 @@ namespace kevlar{
 
   HDF5Image::HDF5Image(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
+      fProducerName(pSet.get<std::string>("ProducerLabel","daq")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
       fDims{
         pSet.get<uint32_t>("ChunkSize",1),
@@ -165,7 +165,7 @@ namespace kevlar{
   {
 
     if(!(this->fBufferCounter==0)){
-      // The new size is now the number of  events in the file
+
       hsize_t newSize[4] = {this->fNEvents,fDims[1],fDims[2],fDims[3]};
       this->fDataSet->extend( newSize );
 
@@ -187,5 +187,4 @@ namespace kevlar{
       this->fBufferCounter=0;
     }
   }
-
 }
