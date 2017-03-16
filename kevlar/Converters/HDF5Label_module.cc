@@ -76,6 +76,7 @@ namespace kevlar{
       hsize_t newSize[2] = {this->fNEvents+1,fDims[1]};
       this->fDataSet->extend( newSize );
       H5::DataSpace filespace(this->fDataSet->getSpace());
+
       hsize_t offset[2]={this->fNEvents-fChunkDims[0],0};
       filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
       H5::DataSpace memspace(2, fChunkDims, NULL);

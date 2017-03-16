@@ -32,7 +32,7 @@ end_product_list
 qualifier	uboonecode	  hdf5 	    boost     gcc	 notes
 e10:debug	e10:debug	e10:debug e10:debug -nq-
 e10:opt		e10:opt		e10:opt   e10:opt   -nq-
-e10:prof	e10:prof	e10:prof  e10:prof  -nq-
+e10:prof	e10:prof	e10:debug  e10:prof  -nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
