@@ -13,9 +13,10 @@ source: {
 
 physics: {
   analyzers: {
-    tpc_image: @local::tpc_image
+    tpcimage: @local::tpcimage
+    particlelabels: @local::particlelabels
   }
-  ana: [tpc_image]
+  ana: [tpc_image, particlelabels ]
   end_paths: [ana]
 }
   

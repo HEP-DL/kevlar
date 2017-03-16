@@ -9,9 +9,15 @@ This Kevlar material is designed to provide an interface to software *external* 
 * Converters
   * HDF5Image
     * Converts RawDigits to HDF5 Image format
+  * HDF5Label
+    * Converts MCTruthParticles to a vector of labels
 * Services
   * HDF5File
     * Provides file output service for HDF5 analyzers
+
+## Requirements
+
+This requires the `uboonecode` UPS environment exist with UPS setup. In addition, the [HDF5 UPS](https://github.com/kwierman/hdf5) package will need to be built and installed in the product path. This needs to be done _before_ the following steps as the HDF5 Cmake Environment doesn't interact well with CETBuildTools during the configuration phase.
 
 ## Installation
 
