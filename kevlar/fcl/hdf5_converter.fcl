@@ -1,10 +1,22 @@
 #include "default_hdf5.fcl"
+//#include "standard_g4_uboone.fcl"
+#include "services_microboone_simulation.fcl"
+
 
 process_name: HDF5Converter
 
 services: {
-  HDF5File: @local::hdf5_file_service
+  HDF5File: @local::hdf5FileService
+#  @table::microboone_g4_services
+  @table::microboone_simulation_services
+#  @table::microboone_full_services
 }
+
+services.DetectorPropertiesService.NumberTimeSamples:        6400
+services.DetectorPropertiesService.ReadOutWindowSize:        6400
+services.DetectorClocksService.InheritClockConfig:           false
+services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
+services.DetectorClocksService.TrigModuleName:               "daq"
 
 source: {
   module_type: RootInput
@@ -13,9 +25,10 @@ source: {
 
 physics: {
   analyzers: {
-    tpc_image: @local::tpc_image
+    tpcimage: @local::tpcImage
+#    particlelabels : @local::particleLabels
   }
-  ana: [tpc_image]
+  ana: [tpcimage]#, particlelabels]
   end_paths: [ana]
 }
   
