@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 
 namespace kevlar{
@@ -42,7 +43,7 @@ namespace kevlar{
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",7));
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",9));
   }
 
   HDF5Label::~HDF5Label()
@@ -70,21 +71,25 @@ namespace kevlar{
         }
       }
     }
-    ++(this->fBufferCounter);
+
+    (this->fBufferCounter)++;
+    (this->fNEvents)++;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
-      hsize_t newSize[2] = {this->fNEvents+1,fDims[1]};
+
+      hsize_t newSize[2] = {this->fNEvents,fDims[1]};
       this->fDataSet->extend( newSize );
+
       H5::DataSpace filespace(this->fDataSet->getSpace());
       hsize_t offset[2]={this->fNEvents-fChunkDims[0],0};
-      filespace.selectHyperslab( H5S_SELECT_SET, fChunkDims, offset );
-      H5::DataSpace memspace(2, fChunkDims, NULL);
-      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+      filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
+
+      H5::DataSpace memspace(2, fChunkDims);
+      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
+                              memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
     }
-
-    ++(this->fNEvents);
 
   }
   
@@ -95,18 +100,60 @@ namespace kevlar{
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
+
+     H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+     H5::StrType strdatatype(H5::PredType::C_S1, 256);
+
+     {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("index0");
+      const std::string strwritebuf ("particle_type");
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
+
+    uint32_t label_index=0;
+    for (auto label : fLabels){
+
+      // Set up write buffer for attribute
+      std::stringstream name;
+      name<<"label_index"<<label_index;
+
+      const std::string ATTR_NAME (name.str());
+      const std::string strwritebuf (label);
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf);
+
+      label_index+=1;
+
+    }
   }
 
   void HDF5Label::endSubRun(art::SubRun const & sr)
   {
     if(!(this->fBufferCounter==0)){
+      // The new size is now the number of  events in the file
       hsize_t newSize[2] = {this->fNEvents,fDims[1]};
       this->fDataSet->extend( newSize );
+
+      //The filespace is always the same.
       H5::DataSpace filespace(this->fDataSet->getSpace());
-      hsize_t offset[2]={this->fNEvents-fBufferCounter,0};
-      hsize_t leftover_size[2] = {this->fBufferCounter, fChunkDims[1]};
+
+      // The offset is the number of events less the size of the buffer
+      hsize_t offset[2] = {this->fNEvents-fBufferCounter,0};
+
+      // Leftovers are the size of the buffer, not the chunk
+      hsize_t leftover_size[2] = { this->fBufferCounter, fChunkDims[1] };
       filespace.selectHyperslab( H5S_SELECT_SET, leftover_size, offset );
-      H5::DataSpace memspace(2, leftover_size, NULL);
+
+      //Select a memoty space for the data to use
+      H5::DataSpace memspace(2, leftover_size);
+
+      // Now write and reset
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
       this->fBufferCounter=0;
     }
