@@ -25,10 +25,10 @@ source: {
 
 physics: {
   analyzers: {
-    tpcimage: @local::tpcImage
-#    particlelabels : @local::particleLabels
+    tpcimage: @local::tpcimage
+    particlelabels: @local::particleLabels
   }
-  ana: [tpcimage]#, particlelabels]
+  ana: [tpc_image, particlelabels ]
   end_paths: [ana]
 }
   
