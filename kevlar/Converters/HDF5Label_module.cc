@@ -33,7 +33,7 @@ namespace kevlar{
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
-      fLabels(pSet.get< std::vector<std::string> >("Labels")),
+      fLabels(pSet.get< std::vector<std::string> >("labels")),
       fDims{
         0, 
         fLabels.size(),
@@ -78,12 +78,12 @@ namespace kevlar{
     for (auto truth: *mct_handle){
       for(int i=0; i<truth.NParticles(); ++i){
         int pdg = truth.GetParticle(i).PdgCode();
+        if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
         std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
         auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
         if(!particle)
           continue;
         std::string name = particle->GetName();
-
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
 
