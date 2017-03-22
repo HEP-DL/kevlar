@@ -3,7 +3,7 @@ include_directories( $ENV{NUTOOLS_INC} )
 include_directories( ${HDF5_INC} )
 
 #HDF5 Image Converter
-simple_plugin( HDF5Image module
+simple_plugin( HDF5RawDigits module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -14,7 +14,7 @@ simple_plugin( HDF5Image module
 )
 
 #HDF5 Label Converter
-simple_plugin( HDF5Label module
+simple_plugin( HDF5ParticleLabelVector module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
