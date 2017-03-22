@@ -10,6 +10,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "TDatabasePDG.h"
 
+#include <exception>
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -19,13 +20,23 @@
 
 namespace kevlar{
 
+  class PDGNameNotFound: public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Name in particle label vector is not in PDG DB";
+    }
+  };
+
+
   HDF5Label::HDF5Label(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fLabels(pSet.get< std::vector<std::string> >("labels")),
       fDims{
-        pSet.get<uint32_t>("ChunkSize",1), fLabels.size(),
+        0, 
+        fLabels.size(),
       },
       fMaxDims{
         H5S_UNLIMITED, fLabels.size(),
@@ -43,7 +54,14 @@ namespace kevlar{
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",9));
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
+      std::cout<<"Finished with HDF5Label default c'tor for module: "<<this->fDataSetName<<std::endl;
+      for(std::vector<std::string>::iterator it = fLabels.begin(); it!=fLabels.end(); ++it){
+        if(! TDatabasePDG::Instance()->GetParticle((*it).c_str())){
+          std::cerr<<"Particle name in HDF5Label config is NOT in PDG DB: "<<*it<<std::endl;
+          throw PDGNameNotFound();
+        }
+      }
   }
 
   HDF5Label::~HDF5Label()
@@ -55,26 +73,36 @@ namespace kevlar{
   {
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
-
+    std::cout<<"HDF5Label:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle){
       for(int i=0; i<truth.NParticles(); ++i){
         int pdg = truth.GetParticle(i).PdgCode();
-	if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
-        std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
+        if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
+        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+        auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
+        if(!particle)
+          continue;
+        std::string name = particle->GetName();
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
-        if(index < int(fLabels.size()) ){
+
+        if(index < int(fLabels.size()) && index>=0 ){
+          std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
+
+
           fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
         }
         else{
-          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;          
+          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;       
         }
       }
     }
+    return;
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
+    std::cout<<"HDF5Label Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
 
@@ -87,10 +115,12 @@ namespace kevlar{
       filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
 
       H5::DataSpace memspace(2, fChunkDims);
+      std::cout<<"HDF5Label:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
                               memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
+      std::cout<<"HDF5Label:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
     }
 
   }
@@ -137,6 +167,7 @@ namespace kevlar{
 
   void HDF5Label::endSubRun(art::SubRun const & sr)
   {
+    return;
     if(!(this->fBufferCounter==0)){
       // The new size is now the number of  events in the file
       hsize_t newSize[2] = {this->fNEvents,fDims[1]};
