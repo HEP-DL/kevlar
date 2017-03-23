@@ -33,7 +33,7 @@ namespace kevlar{
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
-      fLabels(pSet.get< std::vector<std::string> >("labels")),
+      fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
         0, 
         fLabels.size(),

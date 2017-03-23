@@ -13,6 +13,17 @@ simple_plugin( HDF5RawDigits module
   BASENAME_ONLY
 )
 
+#HDF5 Image Converter
+simple_plugin( HDF5Wires module
+    HDF5File_service
+    ${ART_FRAMEWORK_PRINCIPAL}
+    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    larcore_Geometry
+    nusimdata_SimulationBase
+    ${HDF5_LIBRARIES}
+  BASENAME_ONLY
+)
+
 #HDF5 Label Converter
 simple_plugin( HDF5ParticleLabelVector module
     HDF5File_service
