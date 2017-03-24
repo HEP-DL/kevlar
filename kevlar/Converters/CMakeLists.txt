@@ -19,6 +19,8 @@ simple_plugin( HDF5Wires module
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     larcore_Geometry
+    lardata_RecoObjects
+    lardataobj_RecoBase
     nusimdata_SimulationBase
     ${HDF5_LIBRARIES}
   BASENAME_ONLY
