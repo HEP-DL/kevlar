@@ -4,24 +4,38 @@ hdf5FileService: {
   FILENAME: "output.h5"
 }
 
-tpcImage: {
-  module_type: "HDF5Image"
+rawDigits: {
+  module_type: "HDF5RawDigits"
   ProducerLabel: "daq"
   DataSetLabel: "rawdigits"
   ImageHeight: 9600
   ImageWidth: 3600
   NChannels: 3
   ChunkSize: 10
-  fFillValue: 0
+  FillValue: 0
+  CompressionLevel: 5
+}
+
+wires: {
+  module_type: "HDF5Wires"
+  ProducerLabel: "caldata"
+  DataSetLabel: "rawdigits"
+  ImageHeight: 9600
+  ImageWidth: 3600
+  NChannels: 3
+  ChunkSize: 10
+  FillValue: 0
+  CompressionLevel: 5
 }
 
 particleLabels:{
-  module_type: "HDF5Label"
-  labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+","k+"]
+  module_type: "HDF5ParticleLabelVector"
+  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+"]
   ProducerLabel: "generator"
   DataSetLabel: "type"
   ChunkSize: 10
   FillValue: 0
+  CompressionLevel: 5
 }
 
 END_PROLOG
