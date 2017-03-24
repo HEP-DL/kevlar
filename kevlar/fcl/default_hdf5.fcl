@@ -1,7 +1,8 @@
 BEGIN_PROLOG
 
 hdf5FileService: {
-  FILENAME: "output.h5"
+  FileName: "output.h5"
+  PrintErrors: false
 }
 
 rawDigits: {
