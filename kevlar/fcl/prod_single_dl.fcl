@@ -1,3 +1,4 @@
+#include "default_hdf5.fcl"
 #include "services_microboone.fcl"
 #include "singles_microboone.fcl"
 #include "largeantmodules_microboone.fcl"
@@ -5,7 +6,6 @@
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
 #include "mccheatermodules.fcl
-#include "default_hdf5.fcl"
 
 process_name: SinglesGenDL
 
