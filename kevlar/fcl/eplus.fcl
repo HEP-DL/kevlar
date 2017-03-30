@@ -5,6 +5,7 @@
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
 #include "mccheatermodules.fcl"
+#include "default_hdf5.fcl"
 
 process_name: SinglesGenEPlus
 
