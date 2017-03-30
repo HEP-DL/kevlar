@@ -50,32 +50,15 @@ physics:
 
  analyzers:
  {
-   
-   tpcImage: {
-    module_type: "HDF5Image"
-    ProducerLabel: "daq"
-    DataSetLabel: "rawdigits"
-    ImageHeight: 9600
-    ImageWidth: 3456
-    NChannels: 3
-    ChunkSize: 1
-    fFillValue: 0
-   }
-
-   particleLabels:{
-     module_type: "HDF5Label"
-     Labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+"]
-     ProducerLabel: "generator"
-     DataSetLabel: "type"
-     ChunkSize: 1
-     FillValue: 0
-   }
+    tpcimage: @local::rawDigits
+    wires: @local::wires
+    particlelabels: @local::particleLabels   
  }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  simulate: [ generator, largeant, backtrack, optdigitizer, optfem, triggersim, optreadout, daq ]
- analyzeIt:  [ tpcImage, particleLabels ]
+ analyzeIt:  [tpcimage, particlelabels, wires ]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 

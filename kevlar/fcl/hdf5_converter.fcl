@@ -4,7 +4,7 @@
 process_name: HDF5Converter
 
 services: {
-  HDF5File: @local::hdf5FileService
+  HDF5File: @local::HDF5File
   @table::microboone_simulation_services
 }
 
