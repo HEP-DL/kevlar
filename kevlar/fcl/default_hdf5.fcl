@@ -31,7 +31,7 @@ wires: {
 
 particleLabels:{
   module_type: "HDF5ParticleLabelVector"
-  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+"]
+  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
   ProducerLabel: "generator"
   DataSetLabel: "type"
   ChunkSize: 10
