@@ -42,7 +42,7 @@
     <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/eminus/&name;</workdir>
     <numjobs>20</numjobs>
     <datatier>converted</datatier>
-    <defname>&name;_&tag;_conv</defname>
+    <defname>&name;_&tag;_eminus</defname>
   </stage>
 
   <stage name="eplus">
@@ -52,7 +52,7 @@
     <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/eplus/&name;</workdir>
     <numjobs>20</numjobs>
     <datatier>converted</datatier>
-    <defname>&name;_&tag;_conv</defname>
+    <defname>&name;_&tag;_eplus</defname>
   </stage>
 
   <stage name="gamma">
@@ -62,7 +62,7 @@
     <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/gamma/&name;</workdir>
     <numjobs>20</numjobs>
     <datatier>converted</datatier>
-    <defname>&name;_&tag;_conv</defname>
+    <defname>&name;_&tag;_gamma</defname>
   </stage>
 
   <stage name="kplus">
@@ -72,7 +72,7 @@
     <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/kplus/&name;</workdir>
     <numjobs>20</numjobs>
     <datatier>converted</datatier>
-    <defname>&name;_&tag;_conv</defname>
+    <defname>&name;_&tag;_kplus</defname>
   </stage>
 
   <stage name="muminus">
