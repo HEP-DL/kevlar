@@ -169,7 +169,6 @@ namespace kevlar{
 
   void HDF5ParticleLabelVector::endJob()
   {
-    return;
     if(!(this->fBufferCounter==0)){
       // The new size is now the number of  events in the file
       hsize_t newSize[2] = {this->fNEvents,fDims[1]};
