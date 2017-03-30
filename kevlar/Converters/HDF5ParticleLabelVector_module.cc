@@ -98,7 +98,6 @@ namespace kevlar{
         }
       }
     }
-    return;
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
