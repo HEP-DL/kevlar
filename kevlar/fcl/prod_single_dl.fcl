@@ -5,7 +5,7 @@
 #include "detsimmodules_microboone.fcl"
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
-#include "mccheatermodules.fcl
+#include "mccheatermodules.fcl"
 
 process_name: SinglesGenDL
 
