@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY relsim "v04_00_00">
+<!ENTITY file_type "mc">
+<!ENTITY run_type "physics">
+<!ENTITY name "kwierman_convert_pdk_nubarkplus_corsika">
+<!ENTITY tag "devel">
+]>
+
+<job>
+
+<project name="&name;">
+
+  <check>1</check>
+
+  <!-- Project size -->
+  <numevents>10000</numevents>
+  <memory>8192</memory>
+  <disk>60GB</disk>
+  <!-- Operating System -->
+  <os>SL6</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&relsim;</tag>
+    <qual>e10:prof</qual>
+    <local>/uboone/app/users/kwierman/kevlar/kevlar.tar</local>
+  </larsoft>
+
+  <!-- Project stages -->
+
+  <stage name="convert">
+    <fcl>hdf5_converter.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/gen/&name;</workdir>
+    <!--output>prod_pdk-e+pi0_corsika_uboone_${PROCESS}_%tc_gen.root</output-->
+    <inputlist>/uboone/app/users/kwierman/experiments/pdk_prod_files.list</inputlist>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_conv</defname>
+  </stage>
+
+  <!-- file type -->
+  <filetype>&file_type;</filetype>
+
+  <!-- run type -->
+  <runtype>&run_type;</runtype>
+
+</project>
+
+</job>

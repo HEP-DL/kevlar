@@ -1,8 +1,8 @@
 /**
   TODO:: Stop writing documentation before v0.5
 **/
-#ifndef HDF5Image_hh
-#define HDF5Image_hh
+#ifndef HDF5Wires_hh_
+#define HDF5Wires_hh_
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -19,7 +19,7 @@ namespace art{
 }
 
 namespace kevlar{
-  class HDF5Image : public art::EDAnalyzer {
+  class HDF5Wires : public art::EDAnalyzer {
     std::string fProducerName;
     std::string fDataSetName;
     hsize_t fDims[4];// Dataset dimensions
@@ -34,13 +34,13 @@ namespace kevlar{
     uint32_t fBufferCounter;
 
   public:
-    HDF5Image(::fhicl::ParameterSet const& );
-    ~HDF5Image();
+    HDF5Wires(::fhicl::ParameterSet const& );
+    ~HDF5Wires();
     void analyze(::art::Event const&) override;
-    void beginSubRun(::art::SubRun const&) override;
-    void endSubRun(::art::SubRun const&) override;
+    void beginJob() override;
+    void endJob() override;
   };
 }
 
-DEFINE_ART_MODULE(kevlar::HDF5Image)
-#endif //HDF5Image_hh
+DEFINE_ART_MODULE(kevlar::HDF5Wires)
+#endif //HDF5Wires_hh_

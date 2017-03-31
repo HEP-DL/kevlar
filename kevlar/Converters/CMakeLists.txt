@@ -3,7 +3,7 @@ include_directories( $ENV{NUTOOLS_INC} )
 include_directories( ${HDF5_INC} )
 
 #HDF5 Image Converter
-simple_plugin( HDF5Image module
+simple_plugin( HDF5RawDigits module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -13,8 +13,21 @@ simple_plugin( HDF5Image module
   BASENAME_ONLY
 )
 
+#HDF5 Image Converter
+simple_plugin( HDF5Wires module
+    HDF5File_service
+    ${ART_FRAMEWORK_PRINCIPAL}
+    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    larcore_Geometry
+    lardata_RecoObjects
+    lardataobj_RecoBase
+    nusimdata_SimulationBase
+    ${HDF5_LIBRARIES}
+  BASENAME_ONLY
+)
+
 #HDF5 Label Converter
-simple_plugin( HDF5Label module
+simple_plugin( HDF5ParticleLabelVector module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}

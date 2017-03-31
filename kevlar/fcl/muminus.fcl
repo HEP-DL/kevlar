@@ -1,0 +1,3 @@
+#include "prod_single_dl.fcl"
+
+physics.producers.generator.PDG: [ 13 ]

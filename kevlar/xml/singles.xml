@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY relsim "v04_00_00">
+<!ENTITY file_type "mc">
+<!ENTITY run_type "physics">
+<!ENTITY name "kwierman_dl_prodsingles">
+<!ENTITY tag "devel">
+]>
+
+<job>
+
+<project name="&name;">
+
+  <check>1</check>
+
+  <!-- Project size -->
+  <numevents>10000</numevents>
+  <memory>8192</memory>
+  <disk>60GB</disk>
+  <!-- Operating System -->
+  <os>SL6</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&relsim;</tag>
+    <qual>e10:prof</qual>
+    <local>/uboone/app/users/kwierman/kevlar/kevlar.tar</local>
+  </larsoft>
+
+  <!-- Project stages -->
+
+  <stage name="eminus">
+    <fcl>eminus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eminus/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eminus/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/eminus/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_eminus</defname>
+  </stage>
+
+  <stage name="eplus">
+    <fcl>eplus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eplus/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eplus/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/eplus/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_eplus</defname>
+  </stage>
+
+  <stage name="gamma">
+    <fcl>gamma.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gamma/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gamma/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/gamma/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_gamma</defname>
+  </stage>
+
+  <stage name="kplus">
+    <fcl>kplus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/kplus/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/kplus/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/kplus/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_kplus</defname>
+  </stage>
+
+  <stage name="muminus">
+    <fcl>muminus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/muminus/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/muminus/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/muminus/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_conv</defname>
+  </stage>
+
+  <stage name="piminus">
+    <fcl>piminus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/piminus/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/piminus/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/piminus/&name;</workdir>
+    <numjobs>20</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_conv</defname>
+  </stage>
+
+  <!-- file type -->
+  <filetype>&file_type;</filetype>
+
+  <!-- run type -->
+  <runtype>&run_type;</runtype>
+
+</project>
+
+</job>

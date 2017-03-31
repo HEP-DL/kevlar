@@ -1,15 +1,11 @@
 #include "default_hdf5.fcl"
-//#include "standard_g4_uboone.fcl"
 #include "services_microboone_simulation.fcl"
-
 
 process_name: HDF5Converter
 
 services: {
-  HDF5File: @local::hdf5FileService
-#  @table::microboone_g4_services
+  HDF5File: @local::HDF5File
   @table::microboone_simulation_services
-#  @table::microboone_full_services
 }
 
 services.DetectorPropertiesService.NumberTimeSamples:        6400
@@ -25,11 +21,13 @@ source: {
 
 physics: {
   analyzers: {
-    tpcimage: @local::tpcImage
+    tpcimage: @local::rawDigits
+    wires: @local::wires
     particlelabels: @local::particleLabels
+    vtxproj: @local::vtxprojLabels
   }
-  ana: [tpcimage, particlelabels ]
+  ana: [tpcimage, wires, particlelabels, vtxproj ]
+
   end_paths: [ana]
 }
   
-physics.analyzers.particlelabels.labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+"]
