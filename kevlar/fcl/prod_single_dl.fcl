@@ -6,6 +6,10 @@
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
 #include "mccheatermodules.fcl"
+#include "caldata_microboone.fcl"
+#include "calorimetry_microboone.fcl"
+#include "wirecellmodules_microboone.fcl"
+#include "mcreco.fcl"
 
 process_name: SinglesGenDL
 
@@ -41,6 +45,9 @@ physics:
    triggersim:   @local::ubtrigger_dark_bnb
    optreadout:   @local::microboone_optical_dram_readout_sim
    daq:          @local::microboone_simwire
+   digitfilter:                    @local::microboone_rawdigitfilter
+   wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
+   caldata:                        @local::microboone_calroi
  }
 
  analyzers:
@@ -49,7 +56,7 @@ physics:
     wires: @local::wires
     particlelabels: @local::particleLabels   
  }
- simulate: [ generator, largeant, backtrack, optdigitizer, optfem, triggersim, optreadout, daq ]
+ simulate: [ generator, largeant, backtrack, optdigitizer, optfem, triggersim, optreadout, daq, digitfilter, wcNoiseFilter, caldata ]
  analyzeIt:  [tpcimage, particlelabels, wires ]
  stream1:  [ out1 ]
 
@@ -75,3 +82,16 @@ physics.producers.generator.X0: [ 100.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
 physics.producers.generator.P0: [ 1.5 ]
 physics.producers.generator.PDG: [ -211 ]
+
+
+# Turn off noise filtering for mc.
+microboone_reco_mcc8_producers.digitfilter.ProcessNoise:                         false
+microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:              [false,false,false]
+microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
+
+#wirecell noise filtering
+microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                   false
+microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "wcNoiseFilter"
+microboone_reco_mcc8_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
+microboone_reco_mcc8_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...
+microboone_reco_mcc8_producers.caldata.DodQdxCalib:                              false
