@@ -1,5 +1,5 @@
-#ifndef HDF5LABEL_HH
-#define HDF5LABEL_HH
+#ifndef HDF5ParticleLabelVector_HH
+#define HDF5ParticleLabelVector_HH
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -22,7 +22,7 @@ namespace art{
 
 namespace kevlar{
 
-  class HDF5Label : public art::EDAnalyzer {
+  class HDF5ParticleLabelVector : public art::EDAnalyzer {
     std::string fProducerName;
     std::string fDataSetName;
     std::vector<std::string> fLabels;
@@ -37,14 +37,14 @@ namespace kevlar{
     boost::multi_array<int, 2>  fBuffer;
     uint32_t fBufferCounter;
   public:
-    HDF5Label(::fhicl::ParameterSet const& );
-    ~HDF5Label();
+    HDF5ParticleLabelVector(::fhicl::ParameterSet const& );
+    ~HDF5ParticleLabelVector();
     void analyze(::art::Event const&) override;
-    void beginSubRun(::art::SubRun const&) override;
-    void endSubRun(::art::SubRun const&) override;
+    void beginJob() override;
+    void endJob() override;
   };
 
 }
 
-DEFINE_ART_MODULE(kevlar::HDF5Label)
-#endif // HDF5LABEL_HH
+DEFINE_ART_MODULE(kevlar::HDF5ParticleLabelVector)
+#endif // HDF5ParticleLabelVector_HH
