@@ -18,7 +18,7 @@ flcdir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
-kevlar           v1_00_00
+#kevlar           v04_00_00
 boost            v1_61_0
 hdf5             v01_00_00
 uboonecode       v06_26_00

@@ -24,8 +24,9 @@ namespace kevlar{
 
   class HDF5VertexPlaneProjection : public art::EDAnalyzer {
     std::string fProducerName;
+    std::string fG4Name;
     std::string fDataSetName;
-    std::vector<std::string> fLabels;
+    std::vector<std::string> fLabels ;
     hsize_t fDims[2];// Dataset dimensions
     hsize_t fMaxDims[2];// Maximum Data Dimsions
     hsize_t fChunkDims[2];// Chunk Dimensions

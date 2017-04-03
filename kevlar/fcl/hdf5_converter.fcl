@@ -24,8 +24,10 @@ physics: {
     tpcimage: @local::rawDigits
     wires: @local::wires
     particlelabels: @local::particleLabels
+    vtxproj: @local::vtxprojLabels
   }
-  ana: [tpcimage, particlelabels, wires ]
+  ana: [tpcimage, wires, particlelabels, vtxproj ]
+
   end_paths: [ana]
 }
   
