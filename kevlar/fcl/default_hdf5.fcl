@@ -40,9 +40,10 @@ particleLabels:{
 }
 vtxprojLabels:{
   module_type: "HDF5VertexPlaneProjection"
-  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
+  Labels: ["U","V","Y","T"]
   ProducerLabel: "generator"
-  DataSetLabel: "type"
+  G4Label: "largeant"
+  DataSetLabel: "uvyt"
   ChunkSize: 10
   FillValue: 0
   CompressionLevel: 5
