@@ -38,31 +38,14 @@ physics:
  producers:
  {
    generator:    @local::microboone_singlep
-   largeant:     @local::microboone_largeant
-   backtrack:    @local::standard_backtrackerloader
-   optdigitizer: @local::microboone_optical_adc_sim
-   optfem:       @local::microboone_optical_fem_sim
-   triggersim:   @local::ubtrigger_dark_bnb
-   optreadout:   @local::microboone_optical_dram_readout_sim
-   daq:          @local::microboone_simwire
-   digitfilter:                    @local::microboone_rawdigitfilter
-   wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
-   caldata:                        @local::microboone_calroi
  }
 
- analyzers:
- {
-    tpcimage: @local::rawDigits
-    wires: @local::wires
-    particlelabels: @local::particleLabels   
- }
- simulate: [ generator, largeant, backtrack, optdigitizer, optfem, triggersim, optreadout, daq, digitfilter, wcNoiseFilter, caldata ]
- analyzeIt:  [tpcimage, particlelabels, wires ]
+ simulate: [ generator ]
  stream1:  [ out1 ]
 
  trigger_paths: [simulate] 
 
- end_paths:     [analyzeIt, stream1]  
+ end_paths:     [analyzeIt]  
 }
 
 outputs:
@@ -71,7 +54,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "single_gen_uboone.root"
-   dataTier:    "converted"
+   dataTier:    "gen"
    compressionLevel: 1
  }
 }
@@ -82,16 +65,3 @@ physics.producers.generator.X0: [ 100.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
 physics.producers.generator.P0: [ 1.5 ]
 physics.producers.generator.PDG: [ -211 ]
-
-
-# Turn off noise filtering for mc.
-microboone_reco_mcc8_producers.digitfilter.ProcessNoise:                         false
-microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:              [false,false,false]
-microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
-
-#wirecell noise filtering
-microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                   false
-microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "wcNoiseFilter"
-microboone_reco_mcc8_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
-microboone_reco_mcc8_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...
-microboone_reco_mcc8_producers.caldata.DodQdxCalib:                              false
