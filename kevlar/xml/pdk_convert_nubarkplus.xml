@@ -18,7 +18,7 @@
 
   <!-- Project size -->
   <numevents>10000</numevents>
-  <memory>8192</memory>
+  <memory>20000</memory>
   <disk>60GB</disk>
   <!-- Operating System -->
   <os>SL6</os>
@@ -37,12 +37,11 @@
 
   <stage name="convert">
     <fcl>hdf5_converter.fcl</fcl>
-    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</outdir>
-    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</logdir>
-    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/gen/&name;</workdir>
-    <!--output>prod_pdk-e+pi0_corsika_uboone_${PROCESS}_%tc_gen.root</output-->
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/convert/&name;</workdir>
     <inputlist>/uboone/app/users/kwierman/experiments/pdk_prod_files.list</inputlist>
-    <numjobs>20</numjobs>
+    <numjobs>200</numjobs>
     <datatier>converted</datatier>
     <defname>&name;_&tag;_conv</defname>
   </stage>

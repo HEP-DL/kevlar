@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY relsim "v04_00_00">
+<!ENTITY file_type "mc">
+<!ENTITY run_type "physics">
+<!ENTITY name "kwierman_dl_eminus">
+<!ENTITY tag "devel">
+]>
+
+<job>
+
+<project name="&name;">
+
+  <check>1</check>
+
+  <!-- Project size -->
+  <numevents>10000</numevents>
+  <memory>16000</memory>
+  <disk>60GB</disk>
+  <!-- Operating System -->
+  <os>SL6</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&relsim;</tag>
+    <qual>e10:prof</qual>
+    <local>/uboone/app/users/kwierman/kevlar/kevlar.tar</local>
+  </larsoft>
+
+  <!-- Project stages -->
+  <stage name="gen">
+    <fcl>eminus.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/gen/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/gen/&name;</workdir>
+    <output>single_gen_uboone.root</output>
+    <numjobs>20</numjobs>
+    <datatier>generated</datatier>
+    <defname>&name;_&tag;_gen</defname>
+  </stage>
+
+  <stage name="g4">
+    <fcl>standard_g4_uboone.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/g4/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/g4/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/g4/&name;</workdir>
+    <numjobs>400</numjobs>
+    <datatier>simulated</datatier>
+    <defname>&name;_&tag;_g4</defname>
+  </stage>
+
+  <stage name="detsim">
+    <fcl>standard_detsim_ddr_uboone.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/detsim/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/detsim/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/detsim/&name;</workdir>
+    <numjobs>400</numjobs>
+    <datatier>detector-simulated</datatier>
+    <defname>&name;_&tag;_detsim</defname>
+  </stage>
+
+  <stage name="reco1">
+    <fcl>reco_uboone_mcc8_driver_ddr_stage1.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/reco1/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/reco1/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/reco1/&name;</workdir>
+    <numjobs>400</numjobs>
+    <datatier>reconstructed-2d</datatier>
+    <defname>&name;_&tag;_reco1</defname>
+  </stage>
+
+
+  <stage name="convert">
+    <fcl>hdf5_converter.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/convert/&name;</workdir>
+    <numjobs>100</numjobs>
+    <datatier>converted</datatier>
+    <defname>&name;_&tag;_conv</defname>
+  </stage>
+
+
+
+  <!-- file type -->
+  <filetype>&file_type;</filetype>
+
+  <!-- run type -->
+  <runtype>&run_type;</runtype>
+
+</project>
+
+</job>
