@@ -43,9 +43,9 @@ physics:
  simulate: [ generator ]
  stream1:  [ out1 ]
 
- trigger_paths: [simulate] 
+ trigger_paths: [ simulate ] 
 
- end_paths:     [analyzeIt]  
+ end_paths:     [ stream1 ]  
 }
 
 outputs:
