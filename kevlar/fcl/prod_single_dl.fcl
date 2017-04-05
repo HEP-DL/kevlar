@@ -34,7 +34,6 @@ source:
 
 physics:
 {
-
  producers:
  {
    generator:    @local::microboone_singlep
