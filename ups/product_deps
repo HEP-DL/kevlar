@@ -1,4 +1,4 @@
-parent kevlar v04_00_00
+parent kevlar v04_01_00
 defaultqual e10
 
 # Defaults:
@@ -18,7 +18,7 @@ flcdir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
-#kevlar           v04_00_00
+kevlar           v04_01_00
 boost            v1_61_0
 hdf5             v01_00_00
 uboonecode       v06_26_00

@@ -6,7 +6,7 @@
 <!ENTITY relsim "v04_00_00">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
-<!ENTITY name "kwierman_dl_prodsingles">
+<!ENTITY name "kwierman_convert_corsika">
 <!ENTITY tag "devel">
 ]>
 
@@ -18,7 +18,7 @@
 
   <!-- Project size -->
   <numevents>10000</numevents>
-  <memory>8192</memory>
+  <memory>16000</memory>
   <disk>60GB</disk>
   <!-- Operating System -->
   <os>SL6</os>
@@ -35,17 +35,16 @@
 
   <!-- Project stages -->
 
-  <stage name="eminus">
-    <fcl>eminus.fcl</fcl>
-    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eminus/&name;</outdir>
-    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/eminus/&name;</logdir>
-    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/eminus/&name;</workdir>
-    <output>single_gen_uboone.root</output>
-    <numjobs>20</numjobs>
+  <stage name="convert">
+    <fcl>hdf5_converter.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kwierman/&tag;/&relsim;/convert/&name;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kwierman/work/&tag;/&relsim;/convert/&name;</workdir>
+    <inputlist>/uboone/app/users/kwierman/kevlar/cosmics.list</inputlist>
+    <numjobs>500</numjobs>
     <datatier>converted</datatier>
-    <defname>&name;_&tag;_eminus</defname>
+    <defname>&name;_&tag;_conv</defname>
   </stage>
-
 
   <!-- file type -->
   <filetype>&file_type;</filetype>

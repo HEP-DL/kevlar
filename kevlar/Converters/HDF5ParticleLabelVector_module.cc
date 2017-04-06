@@ -55,16 +55,6 @@ namespace kevlar{
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5ParticleLabelVector default c'tor for module: "<<this->fDataSetName<<std::endl;
-      /*
-      auto pdg_table = TDatabasePDG::Instance();
-      for(std::vector<std::string>::iterator it = fLabels.begin(); it!=fLabels.end(); ++it){
-        if(! pdg_table->GetParticle((*it).c_str())){
-          std::cerr<<"Particle name in HDF5ParticleLabelVector config is NOT in PDG DB: "<<*it<<std::endl;
-          throw PDGNameNotFound();
-        }
-      }
-      */
   }
 
   HDF5ParticleLabelVector::~HDF5ParticleLabelVector()
