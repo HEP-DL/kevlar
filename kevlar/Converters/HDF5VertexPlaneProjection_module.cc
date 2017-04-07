@@ -105,42 +105,44 @@ namespace kevlar{
 
 
         for (auto const& mcpdk : mcpdks ) {
-        if ( mcpdk->Process() == "primary" )
-          {
-            std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
-            TLorentzVector xyzt = mcpdk->Position();
-            const TVector3 xyz = mcpdk->Position().Vect();
-            for (size_t ii=0; ii<3; ii++) 
-              {
-            Wire[ii] = geo->NearestWire( xyz, ii);
-            //        std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
-              }
-
-            double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+	  std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+	  std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
+	  if ( mcpdk->Process() == "primary" )
+	    {
+	      //	      std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+	      TLorentzVector xyzt = mcpdk->Position();
+	      const TVector3 xyz = mcpdk->Position().Vect();
+	      for (size_t ii=0; ii<3; ii++) 
+		{
+		  Wire[ii] = geo->NearestWire( xyz, ii);
+		  std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
+		}
+	      
+	      double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
               
-            for (int index=0; index<3; index++ )
-              fBuffer[fBufferCounter][index] = (double) Wire[index];
-            fBuffer[fBufferCounter][3] = Time;
-            mother = true;
-            break; // we only want the one pdk info
-          } //primary
+	      for (int index=0; index<3; index++ )
+		fBuffer[fBufferCounter][index] = (double) Wire[index];
+	      fBuffer[fBufferCounter][3] = Time;
+	      mother = true;
+	      break; // we only want the one pdk info
+	    } //primary
         } // mcpdks
         if (mother) break;
-        } // truth particles
-        if (mother) break;
-      }   // truth bundles in handle
+      } // truth particles
+      if (mother) break;
+    }   // truth bundles in handle
 
-      if(! mother){
-        std::cerr<<"Problem in HDF5VertexPlaneProjection No primary Mother particle found. Throwing. "<< std::endl;
-        throw MotherNotFound();
-      }
+    if(! mother){
+      std::cerr<<"Problem in HDF5VertexPlaneProjection No primary Mother particle found. Throwing. "<< std::endl;
+      throw MotherNotFound();
+    }
 
-      else{
-        std::cout << "";
-        for (int index=0; index<4; index++ )
-      std::cout << fBuffer[fBufferCounter][index] << ", ";
-        std::cout << "." << std::endl;
-      }
+    else{
+      std::cout << "";
+      for (int index=0; index<4; index++ )
+	std::cout << fBuffer[fBufferCounter][index] << ", ";
+      std::cout << "" << std::endl;
+    }
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;

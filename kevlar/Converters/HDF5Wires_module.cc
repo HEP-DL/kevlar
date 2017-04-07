@@ -73,22 +73,30 @@ namespace kevlar{
 
         uint32_t wire = channel_spec.Wire;
         uint32_t plane = channel_spec.Plane;
-        uint32_t tick=0;
-        for(auto code: waveform){
+	//        uint32_t tick=0;
 
-          if(plane>=fDims[1] || tick>=fDims[2] || wire>=fDims[3]){
-            std::cerr<<"DIMENSIONS OUT OF ALIGNMENT: "<<std::endl;
-            std::cerr<<"("<<plane<<','<<tick<<','<<wire<<")"<<">=";
-            std::cerr<<"("<<fDims[0]<<','<<fDims[1]<<','<<fDims[2]<<")";
-            std::cerr<<std::endl;
-            tick++;
-            continue;
-          }
-          fBuffer[fBufferCounter][plane][tick][wire] = int(code) ;
-          ++tick;
-        }
-      }
-    }
+	const recob::Wire::RegionsOfInterest_t& signalROI = wireCon.SignalROI();
+	for(const auto& range : signalROI.get_ranges())
+	  {
+	    for (auto tick = range.begin_index(); tick<=range.end_index(); tick++)
+	      {
+	  //        for(auto code: waveform){
+
+		if(plane>=fDims[1] || tick>=fDims[2] || wire>=fDims[3]){
+		  std::cerr<<"DIMENSIONS OUT OF ALIGNMENT: "<<std::endl;
+		  std::cerr<<"("<<plane<<','<<tick<<','<<wire<<")"<<">=";
+		  std::cerr<<"("<<fDims[0]<<','<<fDims[1]<<','<<fDims[2]<<")";
+		  std::cerr<<std::endl;
+		  // tick++;
+		  continue;
+		}
+		fBuffer[fBufferCounter][plane][tick][wire] =  signalROI[tick]; //int(code) ;
+		//          ++tick;
+
+	      } // ticks
+	  } // ROIs
+      } // channels
+    } // wires
 
 
     (this->fBufferCounter)++;
