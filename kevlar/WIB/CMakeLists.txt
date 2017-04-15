@@ -1,13 +1,14 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
+include_directories( ${FRAMEGEN_INC} )
 
-
-#HDF5 Image Converter
+# WIB frame creator
 simple_plugin( Coldata module
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    ${FRAMEGEN_LIB}
     larcore_Geometry
-    ${FrameGen_LIBRARIES}
+    framegen
   BASENAME_ONLY
 )
 

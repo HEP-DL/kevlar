@@ -26,6 +26,7 @@ namespace kevlar{
     std::string fG4Name;
     std::vector<std::string> fLabels ;
     uint32_t fNEvents;
+    std::string fTime;
 
   public:
     Coldata(::fhicl::ParameterSet const& );
