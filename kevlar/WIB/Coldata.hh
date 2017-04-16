@@ -27,6 +27,7 @@ namespace kevlar{
     std::vector<std::string> fLabels ;
     uint32_t fNEvents;
     std::string fTime;
+    std::chrono::nanoseconds fNanoTime;
 
   public:
     Coldata(::fhicl::ParameterSet const& );

@@ -25,6 +25,7 @@
 #include <sstream>
 #include <iomanip>  // put_time
 #include <ctime>
+#include <chrono>
 
 namespace kevlar{
 
@@ -38,7 +39,7 @@ namespace kevlar{
 
   Coldata::Coldata(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","generator")),
+      fProducerName(pSet.get<std::string>("ProducerLabel","daq")),
       fG4Name(pSet.get<std::string>("G4Label","largeant")),
       fNEvents(0)
   {
@@ -53,15 +54,15 @@ namespace kevlar{
     */
 
     time_t rawtime;
-    struct tm * timeinfo;
+    //    struct tm * timeinfo;
     char buffer[80];
 
-    //    time (&rawtime);
-    timeinfo = localtime(&rawtime);
-    strftime(buffer,sizeof(buffer),"%d-%m-%Y %I:%M:%S",timeinfo);
-
+    time (&rawtime);
+    auto t = localtime(&rawtime);
+    strftime(buffer,sizeof(buffer),"%d-%m-%Y %I:%M:%S",t);
     fTime = std::string(buffer);
 
+    fNanoTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch());
 
   }
 
@@ -111,14 +112,14 @@ namespace kevlar{
     {
       Ft.push_back(Fbare);
     }
-    std::vector<int> a ; a.reserve(geo->Nviews());
+    std::vector<int> wp ; wp.reserve(geo->Nviews());
     for (const auto &v : geo->Views())
       {
 	Fv.push_back(Ft);
-	a.push_back(geo->Nwires(v));
+	wp.push_back(geo->Nwires(v));
       }
 
-    const int MaxWiresPerPlane( *std::max_element(a.begin(),a.end()) );    
+    const int MaxWiresPerPlane( *std::max_element(wp.begin(),wp.end()) );    
 
     F.reserve(int(MaxWiresPerPlane/256)+1);
     for (int ii=0; ii<(int) (MaxWiresPerPlane/256) + 1; ii++)
@@ -128,52 +129,57 @@ namespace kevlar{
     // Now we've got all our needed Frames.
 
     std::string filename("");
+    std::string basename("./WIBFrameFile-");
 
     for (auto digitContainer: *digits){
       auto waveform = digitContainer.ADCs();
       auto channel = digitContainer.Channel();
 
-      for(auto channel_spec : geo->ChannelToWire(channel)){
+      uint32_t tick=0;
+      for(auto code: waveform){
 
-        uint32_t wire = channel_spec.Wire;
-        uint32_t plane = channel_spec.Plane;
-        uint32_t tick=0;
+	for(auto channel_spec : geo->ChannelToWire(channel)){
 
-	std::string basename("./WIBFrameFile_");
-	filename = basename + std::to_string(evt.run()) + "_" + std::to_string(evt.subRun()) + "_" + std::to_string(evt.event()) + "_";
-	filename += fTime + "_";
-	filename += std::to_string(plane) + ".dat";
+	  uint32_t wire = channel_spec.Wire;
+	  uint32_t plane = channel_spec.Plane;
 
-        for(auto code: waveform){
+	  /*
+	  filename = basename + std::to_string(evt.run()) + "_" + std::to_string(evt.subRun()) + "_" + std::to_string(evt.event()) + "_";
+	  filename += fTime + "_";
+	  filename += std::to_string(plane) + ".dat";
+	  */
+
 	  // 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
-	  F.at(tick).at(plane).at(int(wire/256)).setCOLDATA(wire%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
-	  tick++;
+	  F.at(int(wire/256)).at(plane).at(tick).setCOLDATA(wire%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
 
-
-	  if ( (wire+1)%256 == 0 )
+	  if ( ((wire+1)%256 == 0) || (wire == (uint32_t)wp.at(plane)) )
 	    { // If we're in here we've moved onto filling a new Frame object
-	      F.at(tick).at(plane).at(int(wire/256)).resetChecksums();
-	      F.at(tick).at(plane).at(int(wire/256)).setK28_5(0);
-	      F.at(tick).at(plane).at(int(wire/256)).setVersion(2); // Version notation format subject to change.
-	      F.at(tick).at(plane).at(int(wire/256)).setFiberNo(wire%8);
-	      F.at(tick).at(plane).at(int(wire/256)).setCrateNo(wire%2560); // flange?
-	      F.at(tick).at(plane).at(int(wire/256)).setSlotNo(int(wire/512)); // WIB?
-	      //	      F.at(tick).at(plane).at(int(wire/256)).setWIBErrors(_randDouble(_mt)<_errProb);
-	      F.at(tick).at(plane).at(int(wire/256)).setZ(0);
-
+	      F.at(int(wire/256)).at(plane).at(tick).resetChecksums();
+	      F.at(int(wire/256)).at(plane).at(tick).setK28_5(0);
+	      F.at(int(wire/256)).at(plane).at(tick).setVersion(2); // Version notation format subject to change.
+	      F.at(int(wire/256)).at(plane).at(tick).setFiberNo(wire%8);
+	      F.at(int(wire/256)).at(plane).at(tick).setCrateNo(wire%2560); // flange?
+	      F.at(int(wire/256)).at(plane).at(tick).setSlotNo(int(wire/512)); // Same as WIBCounter
+	      //	      F.at(int(wire/256)).at(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
+	      F.at(int(wire/256)).at(plane).at(tick).setZ(0);
+	      F.at(int(wire/256)).at(plane).at(tick).setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(fNanoTime).count()); 
+	      fNanoTime += std::chrono::nanoseconds(500);
+	      F.at(int(wire/256)).at(plane).at(tick).setWIBCounter(int(wire/512));
 	      // For now let's write each Frame to its own file. 
 	      // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
-	      filename = basename + std::to_string(evt.run()) + "_" + std::to_string(evt.subRun()) + "_" + std::to_string(evt.event()) + "_";
-	      filename += std::to_string(plane) + "_" ;
-	      filename += std::to_string(int(wire/256)) + ".dat";
+	      filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
+	      filename += "Plane_" + std::to_string(plane) + "-" ;
+	      filename += "Tick_" + std::to_string(tick) + "-" ;
+	      filename += "Block_" + std::to_string(int(wire/256)) + ".dat";
 
-	      F.at(tick).at(plane).at(int(wire/256)).print(filename, 'b');
+	      F.at(int(wire/256)).at(plane).at(tick).print(filename, 'b'); // write the Frame to disk
 	    }
 
 	}
+	tick++;
       }
     }
-
+    
   }
   
   void Coldata::beginJob()
