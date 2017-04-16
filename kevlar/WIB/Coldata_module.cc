@@ -150,15 +150,16 @@ namespace kevlar{
 	  */
 
 	  // 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
-	  F.at(int(wire/256)).at(plane).at(tick).setCOLDATA(wire%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
+	  // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
+	  F.at(int(wire/256)).at(plane).at(tick).setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
 
 	  if ( ((wire+1)%256 == 0) || (wire == (uint32_t)wp.at(plane)) )
-	    { // If we're in here we've moved onto filling a new Frame object
-	      F.at(int(wire/256)).at(plane).at(tick).resetChecksums();
+	    { // If we're in here we've filled a WIB Frame. We will set some header quantities and write it out.
+
 	      F.at(int(wire/256)).at(plane).at(tick).setK28_5(0);
 	      F.at(int(wire/256)).at(plane).at(tick).setVersion(2); // Version notation format subject to change.
 	      F.at(int(wire/256)).at(plane).at(tick).setFiberNo(wire%8);
-	      F.at(int(wire/256)).at(plane).at(tick).setCrateNo(wire%2560); // flange?
+	      F.at(int(wire/256)).at(plane).at(tick).setCrateNo(wire%(512*5)); // flange?
 	      F.at(int(wire/256)).at(plane).at(tick).setSlotNo(int(wire/512)); // Same as WIBCounter
 	      //	      F.at(int(wire/256)).at(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
 	      F.at(int(wire/256)).at(plane).at(tick).setZ(0);
@@ -170,8 +171,9 @@ namespace kevlar{
 	      filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
 	      filename += "Plane_" + std::to_string(plane) + "-" ;
 	      filename += "Tick_" + std::to_string(tick) + "-" ;
-	      filename += "Block_" + std::to_string(int(wire/256)) + ".dat";
+	      filename += "Frame_" + std::to_string(int(wire/256)) + ".dat";
 
+	      F.at(int(wire/256)).at(plane).at(tick).resetChecksums();
 	      F.at(int(wire/256)).at(plane).at(tick).print(filename, 'b'); // write the Frame to disk
 	    }
 
