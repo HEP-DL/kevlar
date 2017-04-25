@@ -135,13 +135,15 @@ namespace kevlar{
       auto waveform = digitContainer.ADCs();
       auto channel = digitContainer.Channel();
 
-      uint32_t tick=0;
-      for(auto code: waveform){
+      for(auto channel_spec : geo->ChannelToWire(channel)){
 
-	for(auto channel_spec : geo->ChannelToWire(channel)){
+	uint32_t wire = channel_spec.Wire;
+	uint32_t plane = channel_spec.Plane;
 
-	  uint32_t wire = channel_spec.Wire;
-	  uint32_t plane = channel_spec.Plane;
+	uint32_t tick=0;
+	std::chrono::nanoseconds LocNanoTime(fNanoTime);
+	for(auto code: waveform){
+
 
 	  /*
 	  filename = basename + std::to_string(evt.run()) + "_" + std::to_string(evt.subRun()) + "_" + std::to_string(evt.event()) + "_";
@@ -152,7 +154,10 @@ namespace kevlar{
 	  // 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
 	  // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
 	  F.at(int(wire/256)).at(plane).at(tick).setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
-
+	  framegen::Frame Floc;
+	  Floc.setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(code)); // block, fiber, channel
+	  if (wire>250 && wire<=255 && tick==1111 && (plane==0||plane==2))
+	    std::cout << "code is " << code << " for tick,plane,wire: " << tick <<", "<<plane<<", "<<wire << std::endl;
 	  if ( ((wire+1)%256 == 0) || (wire == (uint32_t)wp.at(plane)) )
 	    { // If we're in here we've filled a WIB Frame. We will set some header quantities and write it out.
 
@@ -163,9 +168,19 @@ namespace kevlar{
 	      F.at(int(wire/256)).at(plane).at(tick).setSlotNo(int(wire/512)); // Same as WIBCounter
 	      //	      F.at(int(wire/256)).at(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
 	      F.at(int(wire/256)).at(plane).at(tick).setZ(0);
-	      F.at(int(wire/256)).at(plane).at(tick).setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(fNanoTime).count()); 
-	      fNanoTime += std::chrono::nanoseconds(500);
-	      F.at(int(wire/256)).at(plane).at(tick).setWIBCounter(int(wire/512));
+	      F.at(int(wire/256)).at(plane).at(tick).setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(LocNanoTime).count()); 
+
+	      Floc.setWIBCounter(int(wire/512));
+	      Floc.setK28_5(0);
+	      Floc.setVersion(2); // Version notation format subject to change.
+	      Floc.setFiberNo(wire%8);
+	      Floc.setCrateNo(wire%(512*5)); // flange?
+	      Floc.setSlotNo(int(wire/512)); // Same as WIBCounter
+	      //(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
+	      Floc.setZ(0);
+	      Floc.setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(LocNanoTime).count()); 
+
+	      Floc.setWIBCounter(int(wire/512));
 	      // For now let's write each Frame to its own file. 
 	      // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
 	      filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
@@ -174,13 +189,20 @@ namespace kevlar{
 	      filename += "Frame_" + std::to_string(int(wire/256)) + ".dat";
 
 	      F.at(int(wire/256)).at(plane).at(tick).resetChecksums();
-	      F.at(int(wire/256)).at(plane).at(tick).print(filename, 'b'); // write the Frame to disk
-	    }
+	      Floc.resetChecksums();
 
-	}
-	tick++;
-      }
-    }
+	      if (wire==255 && tick==1111 && (plane==0||plane==2))
+		std::cout << "writing " << filename << " for tick,plane,wire: " << tick <<", "<<plane<<", "<<wire << std::endl;
+
+	      //	      F.at(int(wire/256)).at(plane).at(tick).print(filename, 'b'); // write the Frame to disk
+	      Floc.print(filename, 'b'); // write the Frame to disk
+	    }
+	  tick++;
+	  LocNanoTime += std::chrono::nanoseconds(500);
+	} // code in waveform
+
+      } // channel_spec
+    } // digit_container
     
   }
   
