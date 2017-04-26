@@ -12,6 +12,18 @@ simple_plugin( Coldata module
   BASENAME_ONLY
 )
 
+# WIB file-reader daq::rawdigit creator
+simple_plugin( ColdataValidation module
+    ${ART_FRAMEWORK_PRINCIPAL}
+    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    ${FRAMEGEN_LIB}
+    larcore_Geometry
+    lardata_RawData_utils
+    lardataobj_RawData
+    framegen
+  BASENAME_ONLY
+)
+
 install_headers()
 install_source()
 install_fhicl()

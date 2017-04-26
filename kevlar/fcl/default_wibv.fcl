@@ -1,0 +1,8 @@
+BEGIN_PROLOG
+
+rawDigitsProduce: {
+  module_type: "ColdataValidation"
+  filepath: ""
+}
+
+END_PROLOG
