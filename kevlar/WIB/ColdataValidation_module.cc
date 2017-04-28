@@ -79,11 +79,12 @@ namespace kevlar{
 	wp.push_back(geo->Nwires(v));
       }
 
-    const int MaxWiresPerPlane( *std::max_element(wp.begin(),wp.end()) );    
+    //    const int MaxWiresPerPlane( *std::max_element(wp.begin(),wp.end()) );    
+
     // 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
     // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
 
-    framegen::Frame F;
+
     uint16_t channel(0);
 
     for (int32_t plane=0;  (uint32_t)plane<wp.size(); plane++) {
@@ -93,56 +94,62 @@ namespace kevlar{
       for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii++)
 	digidos.push_back(digit);
 
-      std::vector <uint32_t> W; 
-      for (uint32_t tick=0;  tick<Nticks; tick++) {
-	W.push_back(0);
+      std::vector <uint32_t> W(Nticks,0); 
+      for (uint32_t tick=0; tick<Nticks ; tick++) {
 	
-	for (uint32_t f=0; f<(uint32_t)(MaxWiresPerPlane%256) ; f++) {
+	for (uint32_t f=0; f<(uint32_t)(wp.at(plane)%256) ; f++) {
 	  // Read a file holding one block.
 	  framegen::Frame F;
 
 	  std::string filename(fFilePath);
 	  std::string basename("/WIBFrameFile-");
 
+	  bool badfile(false);
 	  try{
 
 	    filename += basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
 	    filename += "Plane_" + std::to_string(plane) + "-" ;
 	    filename += "Tick_" + std::to_string(tick) + "-" ;
 	    filename += "Frame_" + std::to_string(f) + ".dat";
-	    F.load(filename,f);
+	    badfile = !F.load(filename,0); // only 1 Frame per file, so 0
 
 	  }
 	  catch (...) {
 	    std::cout << "No Filename: " << filename << ". Moving onto next frame, then next tick, then plane. " <<std::endl;
-	    break;
+	    badfile = true;
 	  }
-
-	  /*
+	  if (badfile) break;
+	  
 	  const uint16_t wibcnt = F.getWIBCounter();
-	  const uint8_t k28 = F.getK28_5();
+	  // const uint8_t k28 = F.getK28_5();
 	  const uint8_t fib = F.getFiberNo();
 	  const uint8_t crate = F.getCrateNo(); // flange?
 	  const uint8_t slot = F.getSlotNo(); // Same as WIBCounter
-	  const uint8_t z = F.getZ();
+	  // const uint8_t z = F.getZ();
 	  const uint64_t time = F.getTimestamp(); 
-	  */
+	  
+	  if (!(tick%1000)) {
+	    std::cout << "ColdataValidation_module: Reading " << filename << std::endl;
+	    std::cout << "                          WIB, Fiber, Crate, Slot: " << std::to_string(wibcnt) << ", " << std::to_string(fib) << ", " << std::to_string(crate) << ", " << std::to_string(slot) << std::endl;
+	    std::cout << "                          Timestamp: " << std::to_string(time) << std::endl;
+	  }
 
 	  for (uint32_t wire=0; wire<256; wire++) {
-	    digidos.at(W.at(tick)).at(tick) = F.getCOLDATA(wire%64, int(wire/8)%8, wire%8);
+	    int adc = F.getCOLDATA(wire%64, int(wire/8)%8, wire%8);
+	    //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
+	    digidos.at(W.at(tick)).at(tick) = adc;
 	    W.at(tick)++;
 	  }
 
-	  tick++;
+	} // maxwiresperplane%256  -- blocks
 
-	} // maxwiresperplane
 
       } // ticks
 
       for (uint16_t ii=0; ii<wp.at(plane); ii++) {
 	//  raw::RawDigit::RawDigit(raw::ChannelID_t, short unsigned int, const ADCvector_t&, raw::Compress_t)
-	rawdigit_ptr->emplace_back( (raw::ChannelID_t) channel, (uint16_t) digidos.at(channel).size(), std::move(digidos.at(channel)), raw::kNone);
-	channel += ii;      
+	rawdigit_ptr->emplace_back( (raw::ChannelID_t) channel, (uint16_t) digidos.at(ii).size(), std::move(digidos.at(ii)), raw::kNone);
+	channel += ii; 
       }
 
     } // planes

@@ -1,10 +1,16 @@
-#include "default_wib.fcl"
+#include "default_wibv.fcl"
 #include "services_microboone_simulation.fcl"
 
 process_name: WIBFramesValid
 
 services: {
-  @table::microboone_simulation_services
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "wibvalidate_hist.root" }
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
+  RandomNumberGenerator: {} #ART native random number generator
+  @table::microboone_gen_services
 }
 
 services.DetectorPropertiesService.NumberTimeSamples:        6400
@@ -14,18 +20,31 @@ services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
 services.DetectorClocksService.TrigModuleName:               "daq"
 
 source: {
-  module_type: empty
-  maxEvents:  -1
+  module_type: EmptyEvent
+  maxEvents:   1           # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
 }
 
 physics: {
   producers: {
     wibframes: @local::rawDigitsProduce
   }
+
+  stream1: [out1]
+
   prod: [ wibframes ]
   trigger_paths: [prod]
-#  end_paths: [ana]
+  end_paths: [stream1]
 }
   
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "wibvalidate.root" #default file name, can override from command line with -o or --output
+ }
+}
 
-physics.producers.wibframes.filepath: "/uboone/app/users/echurch/lgm3/"
+physics.producers.wibframes.FilePath: "/uboone/app/users/echurch/lgm3/debug.slf6.v06_26_00/build_slf6.x86_64/run"

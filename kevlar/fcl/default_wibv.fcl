@@ -2,7 +2,7 @@ BEGIN_PROLOG
 
 rawDigitsProduce: {
   module_type: "ColdataValidation"
-  filepath: ""
+  FilePath: "/path/to/the/WIBFramesFiles.dat"
 }
 
 END_PROLOG
