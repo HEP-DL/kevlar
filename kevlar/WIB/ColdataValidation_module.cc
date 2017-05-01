@@ -86,19 +86,21 @@ namespace kevlar{
 
 
     uint16_t channel(0);
+    std::vector <std::vector <int16_t> > digidos ;
 
     for (int32_t plane=0;  (uint32_t)plane<wp.size(); plane++) {
-      std::vector <std::vector <int16_t> > digidos ;
-      std::vector <int16_t> digit(Nticks);
 
-      for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii++)
-	digidos.push_back(digit);
+      std::vector <int16_t> digit(Nticks);
 
       std::vector <uint32_t> W(Nticks,0); 
       for (uint32_t tick=0; tick<Nticks ; tick++) {
 	
-	for (uint32_t f=0; f<(uint32_t)(wp.at(plane)%256) ; f++) {
-	  // Read a file holding one block.
+	for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii+=256) {
+
+	  digidos.push_back(digit);
+	  
+	  int f = ii;
+
 	  framegen::Frame F;
 
 	  std::string filename(fFilePath);
@@ -106,13 +108,13 @@ namespace kevlar{
 
 	  bool badfile(false);
 	  try{
-
+	    
 	    filename += basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
 	    filename += "Plane_" + std::to_string(plane) + "-" ;
 	    filename += "Tick_" + std::to_string(tick) + "-" ;
 	    filename += "Frame_" + std::to_string(f) + ".dat";
 	    badfile = !F.load(filename,0); // only 1 Frame per file, so 0
-
+	    
 	  }
 	  catch (...) {
 	    std::cout << "No Filename: " << filename << ". Moving onto next frame, then next tick, then plane. " <<std::endl;
@@ -128,7 +130,7 @@ namespace kevlar{
 	  // const uint8_t z = F.getZ();
 	  const uint64_t time = F.getTimestamp(); 
 	  
-	  if (!(tick%1000)) {
+	  if (!(tick%1000) && !(channel%1000)) {
 	    std::cout << "ColdataValidation_module: Reading " << filename << std::endl;
 	    std::cout << "                          WIB, Fiber, Crate, Slot: " << std::to_string(wibcnt) << ", " << std::to_string(fib) << ", " << std::to_string(crate) << ", " << std::to_string(slot) << std::endl;
 	    std::cout << "                          Timestamp: " << std::to_string(time) << std::endl;
@@ -137,23 +139,27 @@ namespace kevlar{
 	  for (uint32_t wire=0; wire<256; wire++) {
 	    int adc = F.getCOLDATA(wire%64, int(wire/8)%8, wire%8);
 	    //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
-	    digidos.at(W.at(tick)).at(tick) = adc;
-	    W.at(tick)++;
-	  }
+	    digidos.at(channel).at(tick) = adc;
+	    //	    digidos.at(W.at(tick)).at(tick) = adc;
+	    //	    W.at(tick)++;
 
-	} // maxwiresperplane%256  -- blocks
+	    channel += wire; 
 
+	  } // maxwiresperplane%256  -- blocks
 
+	} // end ii over wires
       } // ticks
 
-      for (uint16_t ii=0; ii<wp.at(plane); ii++) {
-	//  raw::RawDigit::RawDigit(raw::ChannelID_t, short unsigned int, const ADCvector_t&, raw::Compress_t)
-	rawdigit_ptr->emplace_back( (raw::ChannelID_t) channel, (uint16_t) digidos.at(ii).size(), std::move(digidos.at(ii)), raw::kNone);
-	channel += ii; 
-      }
+      //      for (uint16_t ii=0; ii<wp.at(plane); ii++) {
+      //  raw::RawDigit::RawDigit(raw::ChannelID_t, short unsigned int, const ADCvector_t&, raw::Compress_t)
+      // }
 
     } // planes
-    
+
+    for (int ii; ii<channel; ii++) {
+      rawdigit_ptr->emplace_back( (raw::ChannelID_t) channel, (uint16_t) digidos.at(ii).size(), std::move(digidos.at(ii)), raw::kNone);
+    }
+
     evt.put(std::move(rawdigit_ptr));
 
     //    art::put_product_in_principal(std::move(rawdigit_ptr),
