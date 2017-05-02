@@ -20,7 +20,7 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/FindOneP.h"
 
-
+#include <glob.h>
 #include <exception>
 #include <fstream>
 #include <string>
@@ -30,6 +30,7 @@
 #include <iomanip>  // put_time
 #include <ctime>
 #include <chrono>
+
 
 namespace kevlar{
 
@@ -92,36 +93,51 @@ namespace kevlar{
 
       std::vector <int16_t> digit(Nticks);
 
+      for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii++) {
+	digidos.push_back(digit);
+      } // maxwiresperplane%256  -- blocks
+
+
+
       std::vector <uint32_t> W(Nticks,0); 
       for (uint32_t tick=0; tick<Nticks ; tick++) {
+	channel = 0;
+      // loop here on open files (Frames) for this run,subrun,evt, and plane and tick	  
+
+	std::string filename(fFilePath);
+	std::string basename("/WIBFrameFile-");
+	std::vector<std::string> files;
+
+	bool badfile(false);
+	filename += basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
+	filename += "Plane_" + std::to_string(plane) + "-" ;
+	filename += "Tick_" + std::to_string(tick) + "-" ;
+	filename += "Frame_";
+	filename += "*";
+	filename += ".dat";
 	
-	for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii+=256) {
-
-	  digidos.push_back(digit);
-	  
-	  int f = ii;
-
-	  framegen::Frame F;
-
-	  std::string filename(fFilePath);
-	  std::string basename("/WIBFrameFile-");
-
-	  bool badfile(false);
-	  try{
+	try{
 	    
-	    filename += basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
-	    filename += "Plane_" + std::to_string(plane) + "-" ;
-	    filename += "Tick_" + std::to_string(tick) + "-" ;
-	    filename += "Frame_" + std::to_string(f) + ".dat";
-	    badfile = !F.load(filename,0); // only 1 Frame per file, so 0
-	    
-	  }
-	  catch (...) {
-	    std::cout << "No Filename: " << filename << ". Moving onto next frame, then next tick, then plane. " <<std::endl;
-	    badfile = true;
-	  }
-	  if (badfile) break;
+	  glob_t glob_result;
+	  glob(filename.c_str(),GLOB_TILDE,NULL,&glob_result);
 	  
+	  for(unsigned int i=0;i<glob_result.gl_pathc;++i){
+	    files.push_back(std::string(glob_result.gl_pathv[i]));
+	  }
+	  
+	  badfile = !files.size();
+	  
+	}
+	catch (...) {
+	  std::cout << "No Filename: " << filename << ". Moving onto next frame, then next tick, then plane. " <<std::endl;
+	  badfile = true;
+	}
+	if (badfile) break;
+
+	for (auto file : files) {
+
+	  framegen::Frame F;	  
+	  F.load(file);
 	  const uint16_t wibcnt = F.getWIBCounter();
 	  // const uint8_t k28 = F.getK28_5();
 	  const uint8_t fib = F.getFiberNo();
@@ -131,28 +147,25 @@ namespace kevlar{
 	  const uint64_t time = F.getTimestamp(); 
 	  
 	  if (!(tick%1000) && !(channel%1000)) {
-	    std::cout << "ColdataValidation_module: Reading " << filename << std::endl;
+	    std::cout << "ColdataValidation_module: Reading " << file << std::endl;
 	    std::cout << "                          WIB, Fiber, Crate, Slot: " << std::to_string(wibcnt) << ", " << std::to_string(fib) << ", " << std::to_string(crate) << ", " << std::to_string(slot) << std::endl;
 	    std::cout << "                          Timestamp: " << std::to_string(time) << std::endl;
 	  }
 
 	  for (uint32_t wire=0; wire<256; wire++) {
 	    int adc = F.getCOLDATA(wire%64, int(wire/8)%8, wire%8);
-	    //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
+	      //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
 	    digidos.at(channel).at(tick) = adc;
-	    //	    digidos.at(W.at(tick)).at(tick) = adc;
-	    //	    W.at(tick)++;
-
-	    channel += wire; 
+	      //	    digidos.at(W.at(tick)).at(tick) = adc;
+	      //	    W.at(tick)++;
+	      
+	    channel++; 
 
 	  } // maxwiresperplane%256  -- blocks
+	} // files
+	
 
-	} // end ii over wires
       } // ticks
-
-      //      for (uint16_t ii=0; ii<wp.at(plane); ii++) {
-      //  raw::RawDigit::RawDigit(raw::ChannelID_t, short unsigned int, const ADCvector_t&, raw::Compress_t)
-      // }
 
     } // planes
 

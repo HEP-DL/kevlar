@@ -138,6 +138,7 @@ namespace kevlar{
 
     
     std::vector<std::vector<short int>> codeBlk;
+    uint32_t ch(0);
 
     for (auto digitContainer: *digits){ 
       
@@ -152,14 +153,16 @@ namespace kevlar{
 	uint32_t wire_outer = channel_spec.Wire;
 	uint32_t plane_outer = channel_spec.Plane;
 
+
 	// 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
 	  // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
 
-	if ( ((codeBlk.size()+1)%256 == 0) || ((codeBlk.size()+1) == (uint32_t)wp.at(plane_outer)) )
+	if ( ((codeBlk.size())%256 == 0) || ((codeBlk.size()) == (uint32_t)wp.at(plane_outer)) )
 	  { // If we're in here we've filled a WIB Frame. We will set some header quantities and write it out.
 
 
-	      uint32_t tick=0;
+	      uint32_t tick=0; 
+
 	      std::chrono::nanoseconds LocNanoTime(fNanoTime);
 	      while (tick < Nticks) {
 		framegen::Frame Floc;
@@ -175,24 +178,24 @@ namespace kevlar{
 		Floc.setWIBCounter(int(wire_outer/512));
 
 		uint32_t upper;
-		if ( (codeBlk.size()+1)%256 == 0 ) upper=256;
+		if ( (codeBlk.size())%256 == 0 ) upper=256;
 		else upper = (uint32_t) wp.at(plane_outer);
+		    
 		for (uint32_t wire=0; wire<upper; wire++)
 		  {
-
+		    
 		    Floc.setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(codeBlk.at(wire).at(tick))); // block, fiber, channel
 		    // For now let's write each Frame to its own file. 
 		    // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
 		    filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
 		    filename += "Plane_" + std::to_string(plane_outer) + "-" ;
 		    filename += "Tick_" + std::to_string(tick) + "-" ;
-		    filename += "Frame_" + std::to_string(int(wire/256)) + ".dat";
-		
-		    F.at(int(wire/256)).at(plane_outer).at(tick).resetChecksums();
+		    filename += "Frame_" + std::to_string(int(ch/256)) + ".dat";
 		  } // loop over latest 256 wires
 		Floc.resetChecksums();
 		Floc.print(filename, 'b'); // write the Frame to disk
 
+		if (!tick) ch+=256;
 		tick++;
 		LocNanoTime += std::chrono::nanoseconds(500);
 		
@@ -200,7 +203,10 @@ namespace kevlar{
 	      codeBlk.clear();
 	    } // if we're in 256 wire or last one on plane
 
+	if (wire_outer == (uint32_t)wp.at(plane_outer)) ch = 0;
+
       } // channel_spec
+
     } // digit_container
       
   }
