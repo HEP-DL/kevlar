@@ -28,33 +28,13 @@ namespace kevlar{
     }
   };
 
-
   HDF5ParticleLabelVector::HDF5ParticleLabelVector(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
+      HDF5Mixin<2, HDF5ParticleLabelVector>(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
-      fLabels(pSet.get< std::vector<std::string> >("Labels")),
-      fDims{
-        0, 
-        fLabels.size(),
-      },
-      fMaxDims{
-        H5S_UNLIMITED, fLabels.size(),
-      },
-      fChunkDims{
-        pSet.get<uint32_t>("ChunkSize",1), fLabels.size()
-      },
-      fDataSpace(2, fDims, fMaxDims),
-      fParms(),
-      fDataSet(NULL),
-      fFillValue(pSet.get<uint32_t>("FillValue",0)),
-      fNEvents(0),
-      fBuffer(boost::extents[fChunkDims[0]][fChunkDims[1]]),
-      fBufferCounter(0)
+      fLabels(pSet.get< std::vector<std::string> >("Labels"))
   {
-      fParms.setChunk( 2, fChunkDims );
-      fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
   }
 
   HDF5ParticleLabelVector::~HDF5ParticleLabelVector()
@@ -91,39 +71,12 @@ namespace kevlar{
         }
       }
     }
-
-    (this->fBufferCounter)++;
-    (this->fNEvents)++;
-    std::cout<<"HDF5ParticleLabelVector Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
-
-    if (this->fBufferCounter == this->fChunkDims[0]){
-
-      hsize_t newSize[2] = {this->fNEvents,fDims[1]};
-      this->fDataSet->extend( newSize );
-
-      H5::DataSpace filespace(this->fDataSet->getSpace());
-
-      hsize_t offset[2]={this->fNEvents-fChunkDims[0],0};
-      filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
-
-      H5::DataSpace memspace(2, fChunkDims);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
-      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
-                              memspace, filespace );
-      this->fBufferCounter=0;
-      fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
-    }
-
+    this->atEvent();
   }
   
   void HDF5ParticleLabelVector::beginJob()
   {
-    art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    std::string group_name = "label";
-    fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
-      this->fDataSpace,
-      this->fParms);
+    kevlar::HDF5File* _OutputFile = this->atDataSetSetup();
 
      H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
      H5::StrType strdatatype(H5::PredType::C_S1, 256);
@@ -159,27 +112,6 @@ namespace kevlar{
 
   void HDF5ParticleLabelVector::endJob()
   {
-    if(!(this->fBufferCounter==0)){
-      // The new size is now the number of  events in the file
-      hsize_t newSize[2] = {this->fNEvents,fDims[1]};
-      this->fDataSet->extend( newSize );
 
-      //The filespace is always the same.
-      H5::DataSpace filespace(this->fDataSet->getSpace());
-
-      // The offset is the number of events less the size of the buffer
-      hsize_t offset[2] = {this->fNEvents-fBufferCounter,0};
-
-      // Leftovers are the size of the buffer, not the chunk
-      hsize_t leftover_size[2] = { this->fBufferCounter, fChunkDims[1] };
-      filespace.selectHyperslab( H5S_SELECT_SET, leftover_size, offset );
-
-      //Select a memoty space for the data to use
-      H5::DataSpace memspace(2, leftover_size);
-
-      // Now write and reset
-      this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
-      this->fBufferCounter=0;
-    }
   }
 }

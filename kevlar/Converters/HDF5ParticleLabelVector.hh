@@ -1,6 +1,7 @@
 #ifndef HDF5ParticleLabelVector_HH
 #define HDF5ParticleLabelVector_HH
 
+#include "kevlar/Framework/HDF5Mixin.hh"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include <boost/multi_array.hpp>
@@ -22,20 +23,17 @@ namespace art{
 
 namespace kevlar{
 
-  class HDF5ParticleLabelVector : public art::EDAnalyzer {
+
+  class HDF5ParticleLabelVector : public art::EDAnalyzer, public HDF5Mixin<2, HDF5ParticleLabelVector> {
     std::string fProducerName;
     std::string fDataSetName;
     std::vector<std::string> fLabels;
-    hsize_t fDims[2];// Dataset dimensions
-    hsize_t fMaxDims[2];// Maximum Data Dimsions
-    hsize_t fChunkDims[2];// Chunk Dimensions
-    H5::DataSpace fDataSpace;/// Buffer
-    H5::DSetCreatPropList fParms;// IO Parameters
-    H5::DataSet* fDataSet;// points at dataset
-    int fFillValue;
-    uint32_t fNEvents;
-    boost::multi_array<int, 2>  fBuffer;
-    uint32_t fBufferCounter;
+  protected:
+    struct HDF5DataSetProperties
+    {
+      static constexpr const std::string group = "label";
+    };
+
   public:
     HDF5ParticleLabelVector(::fhicl::ParameterSet const& );
     ~HDF5ParticleLabelVector();

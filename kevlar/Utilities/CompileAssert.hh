@@ -13,7 +13,7 @@
         Compile_RUNTIME_ASSERT(true, ThisIsATrueStatement);
         Compile_RUNTIME_ASSERT(false, ThisIsAFalseStatement);
   ~~~~~~~~
-  \note The second argument must be a single word, or else it will be interpreted as several arguements.
+  \note The second argument must be a single word, or else it will be interpreted as several arguments.
 **/
 
 

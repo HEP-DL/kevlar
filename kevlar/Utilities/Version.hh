@@ -4,8 +4,8 @@
 #include "kevlar/Utilities/CompileAssert.h"
 #include "hdf5/H5pubconf.h"
 
-#define KEVLAR_VERSION v02_00_00 
-
-Compile_RUNTIME_ASSERT(H5_HAVE_FILTER_DEFLATE, PleaseEnableHDF5ZlibSupport);
+#define KEVLAR_VERSION "v04_01_00"
+  
+Compile_RUNTIME_ASSERT(H5_HAVE_FILTER_DEFLATE, PleaseCompileHDF5WithZLibSupport);
 
 #endif
