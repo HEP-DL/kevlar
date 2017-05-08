@@ -58,14 +58,7 @@ outputs:
  }
 }
 
-physics.producers.generator.SigmaThetaXZ: [ 5.0 ]
-physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
-physics.producers.generator.X0: [ 100.0 ]
-physics.producers.generator.Z0: [ 50.0 ]
-physics.producers.generator.P0: [ 1.5 ]
 physics.producers.generator.PDG: [ -211 ]
-
-
 physics.producers.generator.P0:                    [ 3. ]      # central value of momentum for each particle
 physics.producers.generator.SigmaP:                [ 1.5 ]      # variation about the central value
 physics.producers.generator.PDist:                 0           # 0 - uniform, 1 - gaussian distribution
