@@ -2,7 +2,7 @@
 #define kevlar_Version_hh_ 1
 
 #include "kevlar/Utilities/CompileAssert.hh"
-#include "hdf5/H5pubconf.h"
+#include "H5pubconf.h"
 
 #define KEVLAR_VERSION "v04_01_00"
   
