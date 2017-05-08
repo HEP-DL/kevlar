@@ -1,5 +1,5 @@
 #include "kevlar/Services/HDF5File.hh"
-#include "kevlar/Utilites/Version.hh"
+#include "kevlar/Utilities/Version.hh"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 
