@@ -3,7 +3,7 @@
 
 #include "kevlar/Services/HDF5File.hh"
 #include "fhiclcpp/ParameterSet.h"
-
+#include <boost/multi_array.hpp>
 
 namespace kevlar{
 
