@@ -28,7 +28,7 @@ namespace kevlar{
     uint32_t fNEvents;
     std::string fTime;
     std::chrono::nanoseconds fNanoTime;
-
+    uint64_t fNow;
 
   public:
     Coldata(::fhicl::ParameterSet const& );

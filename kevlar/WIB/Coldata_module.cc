@@ -150,60 +150,63 @@ namespace kevlar{
       // This in uB is a simple 1-to-1 map. Not so in DUNE.
       for(auto channel_spec : geo->ChannelToWire(channel)){
 
-	uint32_t wire_outer = channel_spec.Wire;
+	uint32_t wire_outer = channel_spec.Wire ;
 	uint32_t plane_outer = channel_spec.Plane;
 
 
 	// 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
 	  // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
 
-	if ( ((codeBlk.size())%256 == 0) || ((codeBlk.size()) == (uint32_t)wp.at(plane_outer)) )
-	  { // If we're in here we've filled a WIB Frame. We will set some header quantities and write it out.
+	if ( ((codeBlk.size())%256 == 0) || (wire_outer == (uint32_t)(wp.at(plane_outer)-1) )  )
+	  { // If we're in here we've filled a codeBlk to go into a WIB Frame. We will set some header quantities and write it out.
 
+	    std::cout << "wire_outer number: " << wire_outer << std::endl;
+	    uint32_t tick=0; 
+	    uint32_t upper;
+	    if ( (codeBlk.size())%256 == 0 ) upper=256;
+	    else { // This means we've hit last wire on plane and want to move onto a new slot, I think.
+	      upper = wire_outer%256;
+	    }
 
-	      uint32_t tick=0; 
-
-	      std::chrono::nanoseconds LocNanoTime(fNanoTime);
-	      while (tick < Nticks) {
-		framegen::Frame Floc;
-		Floc.setWIBCounter(int(wire_outer/512));
-		Floc.setK28_5(0);
-		Floc.setVersion(2); // Version notation format subject to change.
-		Floc.setFiberNo(wire_outer%8);
-		Floc.setCrateNo(wire_outer%(512*5)); // flange?
-		Floc.setSlotNo(int(wire_outer/512)); // Same as WIBCounter
-		//(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
-		Floc.setZ(0);
-		Floc.setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(LocNanoTime).count()); 
-		Floc.setWIBCounter(int(wire_outer/512));
-
-		uint32_t upper;
-		if ( (codeBlk.size())%256 == 0 ) upper=256;
-		else upper = (uint32_t) wp.at(plane_outer);
+	    while (tick < Nticks) {
+	      std::chrono::nanoseconds LocNanoTime(500*tick);
+	      framegen::Frame Floc;
+	      Floc.setWIBCounter(int(wire_outer/512));
+	      Floc.setK28_5(0);
+	      Floc.setVersion(2); // Version notation format subject to change.
+	      Floc.setFiberNo(wire_outer%8); // what is this? We've agreed it takes 8 fibers x 4 per Frame, right?
+	      Floc.setCrateNo(int(wire_outer/(512*5))); // flange?
+	      Floc.setSlotNo(int(wire_outer/512)); // Same as WIBCounter
+	      //(plane).at(tick).setWIBErrors(_randDouble(_mt)<_errProb);
+	      Floc.setZ(0);
+	      Floc.setTimestamp(std::chrono::duration_cast<std::chrono::nanoseconds>(fNanoTime+LocNanoTime).count()); 
+	      
+	      for (uint32_t wire=0; wire<upper; wire++)
+		{
 		    
-		for (uint32_t wire=0; wire<upper; wire++)
-		  {
-		    
-		    Floc.setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(codeBlk.at(wire).at(tick))); // block, fiber, channel
-		    // For now let's write each Frame to its own file. 
-		    // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
-		    filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
-		    filename += "Plane_" + std::to_string(plane_outer) + "-" ;
-		    filename += "Tick_" + std::to_string(tick) + "-" ;
-		    filename += "Frame_" + std::to_string(int(ch/256)) + ".dat";
-		  } // loop over latest 256 wires
-		Floc.resetChecksums();
-		Floc.print(filename, 'b'); // write the Frame to disk
+		  Floc.setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(codeBlk.at(wire).at(tick)) ); // block, fiber, channel
+		  // For now let's write each Frame to its own file. 
+		  // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
+		  filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
+		  filename += "Plane_" + std::to_string(plane_outer) + "-" ;
+		  filename += "Tick_" + std::to_string(tick) + "-" ;
+		  filename += "Frame_" + std::to_string(int(ch/256)) + ".dat";
+		  
+		  //		    std::cout << "tick/wire/wire_outer number: " << tick << "/" << wire << "/" << wire_outer << std::endl;
+		  
+		} // loop over latest 256 wires
+	      Floc.resetChecksums();
+	      Floc.print(filename, 'b'); // write the Frame to disk
 
-		if (!tick) ch+=256;
-		tick++;
-		LocNanoTime += std::chrono::nanoseconds(500);
+	      if (!tick) ch+=256;
+	      tick++;
+	      LocNanoTime += std::chrono::nanoseconds(500);
 		
-	      } // while -- value at each tick -- in waveform
-	      codeBlk.clear();
-	    } // if we're in 256 wire or last one on plane
+	    } // while -- value at each tick -- in waveform
+	    codeBlk.clear();
+	  } // if we're in 256 wire or last one on plane
 
-	if (wire_outer == (uint32_t)wp.at(plane_outer)) ch = 0;
+	if (wire_outer == (uint32_t)(wp.at(plane_outer)-1) ) ch = 0;
 
       } // channel_spec
 

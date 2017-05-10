@@ -74,10 +74,13 @@ namespace kevlar{
 
 
 
+    uint16_t cnt(0);
     std::vector<int> wp ; wp.reserve(geo->Nviews());
     for (const auto &v : geo->Views())
       {
 	wp.push_back(geo->Nwires(v));
+	std::cout << "Wires in plane/view" << cnt << "/" << v << ": " << wp.at(cnt) << std::endl;
+	cnt++;
       }
 
     //    const int MaxWiresPerPlane( *std::max_element(wp.begin(),wp.end()) );    
@@ -90,7 +93,9 @@ namespace kevlar{
     std::vector <std::vector <int16_t> > digidos ;
 
     for (int32_t plane=0;  (uint32_t)plane<wp.size(); plane++) {
-
+      uint32_t off(0);
+      if (plane==1) off+=wp[0];
+      if (plane==2) off+=wp[1];
       std::vector <int16_t> digit(Nticks);
 
       for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii++) {
@@ -101,7 +106,7 @@ namespace kevlar{
 
       std::vector <uint32_t> W(Nticks,0); 
       for (uint32_t tick=0; tick<Nticks ; tick++) {
-	channel = 0;
+	channel = 0 + off;
       // loop here on open files (Frames) for this run,subrun,evt, and plane and tick	  
 
 	std::string filename(fFilePath);
@@ -146,9 +151,9 @@ namespace kevlar{
 	  // const uint8_t z = F.getZ();
 	  const uint64_t time = F.getTimestamp(); 
 	  
-	  if (!(tick%1000) && !(channel%1000)) {
+	  if (!(tick%1000) && !(channel%200)) {
 	    std::cout << "ColdataValidation_module: Reading " << file << std::endl;
-	    std::cout << "                          WIB, Fiber, Crate, Slot: " << std::to_string(wibcnt) << ", " << std::to_string(fib) << ", " << std::to_string(crate) << ", " << std::to_string(slot) << std::endl;
+	    std::cout << "                          WIB, Fiber, Crate, Slot, channel-start, offset: " << std::to_string(wibcnt) << ", " << std::to_string(fib) << ", " << std::to_string(crate) << ", " << std::to_string(slot) << ", " << std::to_string(channel) << ", " << std::to_string(off)  << std::endl;
 	    std::cout << "                          Timestamp: " << std::to_string(time) << std::endl;
 	  }
 
@@ -169,7 +174,7 @@ namespace kevlar{
 
     } // planes
 
-    for (int ii; ii<channel; ii++) {
+    for (int ii=0; ii<channel; ii++) {
       rawdigit_ptr->emplace_back( (raw::ChannelID_t) channel, (uint16_t) digidos.at(ii).size(), std::move(digidos.at(ii)), raw::kNone);
     }
 
