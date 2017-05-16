@@ -159,7 +159,7 @@ namespace kevlar{
 
 	  for (uint32_t wire=0; wire<256; wire++) {
 	    int adc = F.getCOLDATA(int(wire/64), int(wire/8)%8, wire%8);
-	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
+	    //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
 	    digidos.at(channel).at(tick) = adc;
 	      //	    digidos.at(W.at(tick)).at(tick) = adc;
 	      //	    W.at(tick)++;
