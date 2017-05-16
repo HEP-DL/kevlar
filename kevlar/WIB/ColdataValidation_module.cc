@@ -96,7 +96,7 @@ namespace kevlar{
       uint32_t off(0);
       if (plane==1) off+=wp[0];
       if (plane==2) off+=wp[1];
-      std::vector <int16_t> digit(Nticks);
+      std::vector <int16_t> digit(Nticks,0);
 
       for (uint32_t ii=0; ii<(uint32_t)wp[plane]; ii++) {
 	digidos.push_back(digit);
@@ -158,13 +158,14 @@ namespace kevlar{
 	  }
 
 	  for (uint32_t wire=0; wire<256; wire++) {
-	    int adc = F.getCOLDATA(wire%64, int(wire/8)%8, wire%8);
-	      //	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
+	    int adc = F.getCOLDATA(int(wire/64), int(wire/8)%8, wire%8);
+	    std::cout << " adc, wire, tick, W.at(tick), digidos.size(), digidos.at(W.at(tick)).size()" << adc << ", " << wire << ", " << tick << ", " << W.at(tick) << ", " << digidos.size() <<", " << digidos.at(W.at(tick)).size()  << std::endl;
 	    digidos.at(channel).at(tick) = adc;
 	      //	    digidos.at(W.at(tick)).at(tick) = adc;
 	      //	    W.at(tick)++;
 	      
 	    channel++; 
+	    if (channel >= wp[plane]) break;
 
 	  } // maxwiresperplane%256  -- blocks
 	} // files

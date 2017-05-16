@@ -153,7 +153,7 @@ namespace kevlar{
 	uint32_t wire_outer = channel_spec.Wire ;
 	uint32_t plane_outer = channel_spec.Plane;
 
-
+	//	std::cout << "Coldata_module: wire_outer, plane_outer " << wire_outer << ", " << plane_outer << std::endl ;
 	// 8 fibers * 8 channels each carry 64 channels of one ADC ASIC from FEMB to WIB. 4 such ADC's worth of channels (256) fill one block.
 	  // For MicroBooNE this leads to ~8256/256*9600 = 40k Frames, each about 256*1.5 ~ 400 Bytes large.
 
@@ -184,18 +184,18 @@ namespace kevlar{
 	      for (uint32_t wire=0; wire<upper; wire++)
 		{
 		    
-		  Floc.setCOLDATA(int(wire/64)%4, int(wire/8)%8, wire%8, int(codeBlk.at(wire).at(tick)) ); // block, fiber, channel
-		  // For now let's write each Frame to its own file. 
-		  // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
-		  filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
-		  filename += "Plane_" + std::to_string(plane_outer) + "-" ;
-		  filename += "Tick_" + std::to_string(tick) + "-" ;
-		  filename += "Frame_" + std::to_string(int(ch/256)) + ".dat";
-		  
-		  //		    std::cout << "tick/wire/wire_outer number: " << tick << "/" << wire << "/" << wire_outer << std::endl;
+		  Floc.setCOLDATA(int(wire/64), int(wire/8)%8, wire%8, int(codeBlk.at(wire).at(tick)) ); // block, fiber, channel		  
+		  // std::cout << "tick/wire/wire_outer number/adc: " << tick << "/" << wire << "/" << wire_outer << "/" << int(codeBlk.at(wire).at(tick)) << std::endl;
 		  
 		} // loop over latest 256 wires
 	      Floc.resetChecksums();
+	      // For now let's write each Frame to its own file. 
+	      // Later comment next 3 lines out to write one whole plane's worth of Frames to one file. EC, 15-Apr-2017.
+	      filename = basename + "Run_" + std::to_string(evt.run()) + "-SubRun_" + std::to_string(evt.subRun()) + "-Event_" + std::to_string(evt.event()) + "-";
+	      filename += "Plane_" + std::to_string(plane_outer) + "-" ;
+	      filename += "Tick_" + std::to_string(tick) + "-" ;
+	      filename += "Frame_" + std::to_string(int(ch/256)) + ".dat";
+
 	      Floc.print(filename, 'b'); // write the Frame to disk
 
 	      if (!tick) ch+=256;
