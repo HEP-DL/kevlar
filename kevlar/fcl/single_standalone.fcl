@@ -81,6 +81,7 @@ physics:
  filters:
  { 
   @table::microboone_reco_mcc8_filters
+  swtrigger: @local::microboone_swtrigger_mc_bnb
  }
 
   analyzers: {
