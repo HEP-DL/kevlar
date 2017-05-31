@@ -80,7 +80,6 @@ physics:
 
  filters:
  { 
-  @table::microboone_reco_mcc8_filters
   swtrigger: @local::microboone_swtrigger_mc_bnb
  }
 
@@ -92,7 +91,27 @@ physics:
   }
   ana: [tpcimage, wires, particlelabels, vtxproj ]
 
- simulate: [ rns, generator, largeant, mcreco, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger, ophitBeam, ophitCosmic, saturation, simpleFlashBeam, simpleFlashCosmic, opflashBeam, opflashCosmic, digitfilter, wcNoiseFilter, caldata, gaushit, mchitfinder ]
+ simulate: [ rns,
+             generator,
+             largeant,
+             mcreco,
+             optdigitizer,
+             optfem,
+             triggersim,
+             pmtreadout,
+             daq,
+             mchitfinder,
+             saturation,
+            ophitCosmic,
+            ophitBeam,
+            opflashCosmic,
+            opflashBeam,
+            simpleFlashCosmic,
+            simpleFlashBeam,
+            wcNoiseFilter,
+            caldata,
+            gaushit]
+
  stream1:  [ out1 ]
 
  trigger_paths: [ simulate ] 
@@ -106,7 +125,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "single_gen_uboone.root"
-   dataTier:    "gen"
+   dataTier:    "convert"
    compressionLevel: 1
  }
 }
