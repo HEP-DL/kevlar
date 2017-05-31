@@ -138,6 +138,3 @@ services.SignalShapingServiceMicroBooNE.FieldRespAmpVec: [0.555, 0.447, 1.46]
 
 physics.reco: [ @sequence::microboone_reco_mcc8_stage1 ]
 physics.trigger_paths: [ reco ]
-outputs.out1.fileName: "%ifb_%tc_reco1.root"
-outputs.out1.dataTier: "reconstructed-2d"
-source.inputCommands: ["keep *_*_*_*", "drop *_*_*_McReco*" ]
