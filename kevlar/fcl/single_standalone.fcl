@@ -61,7 +61,20 @@ physics:
    triggersim:     @local::ubtrigger_dark_bnb
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
-   @table::microboone_reco_mcc8_producers
+   ophitBeam         : @local::microboone_ophit_saturation_beam
+   ophitCosmic       : @local::microboone_ophit_saturation_cosmic
+   saturation : @local::correct_saturation_mc
+   simpleFlashBeam   : @local::UBFlashBeamMC
+   simpleFlashCosmic : @local::UBFlashCosmicMC
+   opflashBeam       : @local::microboone_opflash_saturation_beam
+   opflashCosmic     : @local::microboone_opflash_saturation_cosmic
+   digitfilter:                    @local::microboone_rawdigitfilter
+   wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
+
+   caldata:                        @local::microboone_calroi
+
+   gaushit:                        @local::microboone_gaushitfinder
+   mchitfinder:                    @local::standard_mchitfinder
    rns:            { module_type: "RandomNumberSaver" }
  }
 
@@ -78,7 +91,7 @@ physics:
   }
   ana: [tpcimage, wires, particlelabels, vtxproj ]
 
- simulate: [ rns, generator, largeant, mcreco, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger  ]
+ simulate: [ rns, generator, largeant, mcreco, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger, ophitBeam, ophitCosmic, saturation, simpleFlashBeam, simpleFlashCosmic, opflashBeam, opflashCosmic, digitfilter, wcNoiseFilter, caldata, gaushit, mchitfinder ]
  stream1:  [ out1 ]
 
  trigger_paths: [ simulate ] 
@@ -135,6 +148,3 @@ services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
 services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0, 1.0]
 services.SignalShapingServiceMicroBooNE.CalibResponseTOffset: [ 0.0, 2.0, 0.0]
 services.SignalShapingServiceMicroBooNE.FieldRespAmpVec: [0.555, 0.447, 1.46]
-
-physics.reco: [ @sequence::microboone_reco_mcc8_stage1 ]
-physics.trigger_paths: [ reco ]
