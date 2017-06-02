@@ -26,7 +26,7 @@ physics: {
     particlelabels: @local::particleLabels
     vtxproj: @local::vtxprojLabels
   }
-  ana: [tpcimage, wires, particlelabels, vtxproj ]
+  ana: [tpcimage, wires, particlelabels ]
 
   end_paths: [ana]
 }
