@@ -140,9 +140,9 @@ physics.producers.generator.X0:                    [ 128. ]     # in cm in world
 physics.producers.generator.Y0:                    [ 0. ]      # in cm in world coordinates, ie y = 0 is at the center of the TPC
 physics.producers.generator.Z0:                    [ 518.5 ]     # in cm in world coordinates, ie z = 0 is at the upstream edge of
 physics.producers.generator.T0:                    [ 0. ]      # starting time
-physics.producers.generator.SigmaX:                [ 128. ]      # variation in the starting x position
-physics.producers.generator.SigmaY:                [ 116.5 ]      # variation in the starting y position
-physics.producers.generator.SigmaZ:                [ 518.5 ]     # variation in the starting z position
+physics.producers.generator.SigmaX:                [ 64. ]      # variation in the starting x position
+physics.producers.generator.SigmaY:                [ 58.5 ]      # variation in the starting y position
+physics.producers.generator.SigmaZ:                [ 256 ]     # variation in the starting z position
 physics.producers.generator.SigmaT:                [ 0.23 ]     # variation in the starting time
 physics.producers.generator.PosDist:               0           # 0 - uniform, 1 - gaussian
 physics.producers.generator.TDist:                 0           # 0 - uniform, 1 - gaussian
