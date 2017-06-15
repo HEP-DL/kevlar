@@ -14,7 +14,7 @@ rawDigits: {
   NChannels: 3
   ChunkSize: 1
   FillValue: 0
-  CompressionLevel: 5
+  CompressionLevel: 7
 }
 
 wires: {
@@ -26,7 +26,7 @@ wires: {
   NChannels: 3
   ChunkSize: 1
   FillValue: 0
-  CompressionLevel: 5
+  CompressionLevel: 7
 }
 
 particleLabels:{
@@ -36,8 +36,9 @@ particleLabels:{
   DataSetLabel: "type"
   ChunkSize: 10
   FillValue: 0
-  CompressionLevel: 5
+  CompressionLevel: 7
 }
+
 vtxprojLabels:{
   module_type: "HDF5VertexPlaneProjection"
   Labels: ["U","V","Y","T"]
@@ -46,7 +47,17 @@ vtxprojLabels:{
   DataSetLabel: "uvyt"
   ChunkSize: 10
   FillValue: 0
-  CompressionLevel: 5
+  CompressionLevel: 7
+}
+
+semantic_segments: {
+  module_type: "HDF5ParticleLabelSS"
+  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
+  ProducerLabel: "generator"
+  DataSetLabel: "segments"
+  ChunkSize: 1
+  FillValue: 0
+  CompressionLevel: 7
 }
 
 END_PROLOG
