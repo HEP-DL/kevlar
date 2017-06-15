@@ -27,7 +27,7 @@ namespace kevlar{
     std::string fDataSetName;
     std::vector<std::string> fLabels;
     hsize_t fDims[2];// Dataset dimensions
-    hsize_t fMaxDims[2];// Maximum Data Dimsions
+    hsize_t fMaxDims[2];// Maximum Data Dimensions
     hsize_t fChunkDims[2];// Chunk Dimensions
     H5::DataSpace fDataSpace;/// Buffer
     H5::DSetCreatPropList fParms;// IO Parameters
