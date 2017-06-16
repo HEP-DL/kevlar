@@ -1,5 +1,7 @@
 BEGIN_PROLOG
 
+hdf5labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
+
 HDF5File: {
   FileName: "output.h5"
   PrintErrors: false
@@ -31,7 +33,7 @@ wires: {
 
 particleLabels:{
   module_type: "HDF5ParticleLabelVector"
-  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
+  Labels: @local::hdf5labels
   ProducerLabel: "generator"
   DataSetLabel: "type"
   ChunkSize: 10
@@ -50,9 +52,9 @@ vtxprojLabels:{
   CompressionLevel: 7
 }
 
-semantic_segments: {
+semanticSegments: {
   module_type: "HDF5ParticleLabelSS"
-  Labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+","gamma"]
+  Labels: @local::hdf5labels
   ProducerLabel: "generator"
   DataSetLabel: "segments"
   ChunkSize: 1

@@ -8,17 +8,14 @@
 #include <string>
 #include <vector>
 
-
 namespace fhicl{
   class ParameterSet;
 }
-
 
 namespace art{
   class Event;
   class SubRun;  
 }
-
 
 namespace kevlar{
 

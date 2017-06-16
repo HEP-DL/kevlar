@@ -5,16 +5,10 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable    
+#include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
-
-#include "canvas/Persistency/Common/FindManyP.h"
-#include "canvas/Persistency/Common/FindOneP.h"
-
 
 #include <exception>
 #include <fstream>
@@ -26,13 +20,6 @@
 
 namespace kevlar{
 
-  class MotherNotFound: public std::exception
-  {
-    virtual const char* what() const throw()
-    {
-      return "Primary Mother particle not found.";
-    }
-  };
 
   HDF5ParticleLabelSS::HDF5ParticleLabelSS(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
@@ -62,14 +49,14 @@ namespace kevlar{
         3,
         2
       },
-      fDataSpace(2, fDims, fMaxDims),
+      fDataSpace(5, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
       fNEvents(0),
       fNInstances(0)
   {
-      fParms.setChunk( 2, fChunkDims );
+      fParms.setChunk( 5, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
   }
@@ -137,69 +124,121 @@ namespace kevlar{
               {
                 eventBuffer.at(index).at(plane).push_back(std::make_pair(wire[plane], time));
                 if(eventBuffer.at(index).at(plane).size()>this->fNInstances)
+                {
                   this->fNInstances = eventBuffer.at(index).at(plane).size();
+                  std::cout<<"HDF5ParticleLabelSS: Resizing Instance index to "<<this->fNInstances<<std::endl;
+                }
               }
             }
 
             delete[] wire;
           }
         }
-        else{
-          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;       
+        else
+        {
+          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;
         }
       }
     }
     //alright, now that we've got the event buffer, it's time to empty into the real buffer.
     //first, resize the real buffer if the dimensions are larger
-    boost::multi_array<int, 5>  buffer(boost::extents[1][this->fNInstances][fChunkDims[2]][fChunkDims[3]][fChunkDims[4]]);
+    boost::multi_array<int, 5>  buffer(boost::extents[1][this->fNInstances][fLabels.size()][3][2]);
     (this->fNEvents)++;
-    for(unsigned i=0; i<eventBuffer.size();++i)//particle type
+    for(unsigned i=0; i < eventBuffer.size(); ++i)//particle type
     {
-      for(unsigned j=0; j<eventBuffer[i].size();++j)//plane
+      for(unsigned j=0; j < eventBuffer[i].size(); ++j)//plane
       {
-        for(unsigned k=0; k<eventBuffer[i][j].size();++k)//instance
+        for(unsigned k=0; k < eventBuffer[i][j].size(); ++k)//instance
         {
           buffer[0][k][i][j][0] = eventBuffer[i][j][k].first;
           buffer[0][k][i][j][1] = eventBuffer[i][j][k].second;
-        }        
+        }
       }
     }
 
+    fChunkDims[1] = this->fNInstances;
+    hsize_t hyperslabSize[5] = { 1, this->fNInstances, fLabels.size(), 3, 2 };
+    hsize_t newSize[5] = { this->fNEvents, this->fNInstances, fLabels.size(), 3, 2 };
+    this->fDataSet->extend( newSize );
+    H5::DataSpace filespace(this->fDataSet->getSpace());
+    hsize_t offset[5]={this->fNEvents-1,0,0,0,0};
+    filespace.selectHyperslab( H5S_SELECT_SET, hyperslabSize, offset );
+    H5::DataSpace memspace(5, hyperslabSize);
 
+    std::cout<<"hyperslab size: ";
+    for(int i=0; i<5;i++)std::cout<<hyperslabSize[i]<<" ";
+      std::cout<<std::endl;
 
+    std::cout<<"new size: ";
+    for(int i=0; i<5;i++)std::cout<<newSize[i]<<" ";
+      std::cout<<std::endl;
 
+    std::cout<<"offset: ";
+    for(int i=0; i<5;i++)std::cout<<offset[i]<<" ";
+      std::cout<<std::endl;
 
-      hsize_t newSize[5] = {this->fNEvents,this->fNInstances, fDims[2], fDims[3], fDims[4]};
-      this->fDataSet->extend( newSize );
+    std::cout<<this->fDataSet<<std::endl;
 
-      H5::DataSpace filespace(this->fDataSet->getSpace());
-
-      hsize_t offset[5]={this->fNEvents-fChunkDims[0],0,0,0,0};
-      filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
-
-      H5::DataSpace memspace(5, fChunkDims);
-      std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
-      this->fDataSet->write( buffer.data(), H5::PredType::NATIVE_INT, 
-                              memspace, filespace );
-      std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
-
+    std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" writing buffer to file" << std::endl;
+    this->fDataSet->write( buffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+    std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" finished resetting buffer" << std::endl;
   }
   
   void HDF5ParticleLabelSS::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    std::string group_name = "label";
+    std::string group_name = "segments";
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
 
-     H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
-     H5::StrType strdatatype(H5::PredType::C_S1, 256);
+    H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+    H5::StrType strdatatype(H5::PredType::C_S1, 256);
 
-     {
+    {
       // Set up write buffer for attribute
-      const std::string ATTR_NAME ("name");
-      const std::string strwritebuf ("semantic segmentation");
+      const std::string ATTR_NAME ("index0");
+      const std::string strwritebuf ("event");
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
+
+    {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("index1");
+      const std::string strwritebuf ("instance");
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
+
+    {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("index2");
+      const std::string strwritebuf ("particle");
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
+
+    {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("index3");
+      const std::string strwritebuf ("plane");
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
+
+    {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("index4");
+      const std::string strwritebuf ("coordinate");
 
       // Create attribute and write to it
       H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);

@@ -5,10 +5,8 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable    
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
 
@@ -72,11 +70,6 @@ namespace kevlar{
   {
     
     art::ServiceHandle<geo::Geometry> geo;
-    //TimeService
-    //    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
-
-    //    tss->preProcessEvent(evt);
-    // auto const* ts = tss->provider();
 
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     double vd = detprop->DriftVelocity(); //cm/musec
@@ -115,14 +108,21 @@ namespace kevlar{
         for (size_t ii=0; ii<3; ii++) 
         {
             //ERIC: This is where the code breaks
-          Wire[ii] = geo->NearestWire( xyz, ii);
+          try
+          {
+            Wire[ii] = geo->NearestWire( xyz, ii);
+          }
+          catch(cet::exception& e )
+          {
+            Wire[ii] = 0;
+          }          
           std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
         }
         
         double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
               
         for (int index=0; index<3; index++ )
-  fBuffer[fBufferCounter][index] = (double) Wire[index];
+          fBuffer[fBufferCounter][index] = (double) Wire[index];
         fBuffer[fBufferCounter][3] = Time;
         mother = true;
         break; // we only want the one pdk info
