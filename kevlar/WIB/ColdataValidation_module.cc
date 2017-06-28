@@ -91,9 +91,10 @@ namespace kevlar{
 
     uint16_t channel(0);
     std::vector <std::vector <int16_t> > digidos ;
+    uint32_t off(0);
 
     for (int32_t plane=0;  (uint32_t)plane<wp.size(); plane++) {
-      uint32_t off(0);
+
       if (plane==1) off+=wp[0];
       if (plane==2) off+=wp[1];
       std::vector <int16_t> digit(Nticks,0);
