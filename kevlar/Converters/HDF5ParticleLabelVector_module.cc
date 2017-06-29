@@ -130,7 +130,7 @@ namespace kevlar{
 
      {
       // Set up write buffer for attribute
-      const std::string ATTR_NAME ("index0");
+      const std::string ATTR_NAME ("index1");
       const std::string strwritebuf ("particle_type");
 
       // Create attribute and write to it

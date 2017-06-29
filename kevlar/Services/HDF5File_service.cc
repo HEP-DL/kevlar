@@ -1,4 +1,5 @@
 #include "kevlar/Services/HDF5File.hh"
+#include "kevlar/Utilities/Version.hh"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 
@@ -14,6 +15,19 @@ namespace kevlar{
     // Pattern to function without vomiting all over the terminal output
     if(! pset.get<bool>("PrintErrors", true) )
       H5::Exception::dontPrint();
+
+    H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+    H5::StrType strdatatype(H5::PredType::C_S1, 256);
+
+    {
+      // Set up write buffer for attribute
+      const std::string ATTR_NAME ("kevlar_version");
+      const std::string strwritebuf (KEVLAR_VERSION);
+
+      // Create attribute and write to it
+      H5::Attribute myatt_in = fOutput.createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
+      myatt_in.write(strdatatype, strwritebuf); 
+    }
   }
 
   HDF5File::~HDF5File()

@@ -47,7 +47,6 @@ namespace kevlar{
       fParms.setChunk( 4, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5Wires default c'tor for module: "<<this->fDataSetName<<std::endl;
   }
 
   HDF5Wires::~HDF5Wires()
