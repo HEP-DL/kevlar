@@ -29,7 +29,6 @@ find_ups_product( cetbuildtools v4_14_01 )
 find_ups_product( hdf5 v01_00_00 )
 find_ups_product( boost v1_00_00 )
 
-
 cet_find_library( hdf5 NAMES hdf5_debug hdf5-shared hdf5_opt PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
 cet_find_library( hdf5_cpp NAMES hdf5_cpp_debug hdf5_cpp-shared hdf5_cpp_opt PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
 cet_find_library( hdf5_hl NAMES hdf5_hl_debug hdf5_hl-shared hdf5_hl_opt PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
