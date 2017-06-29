@@ -5,10 +5,8 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable    
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
 
@@ -26,13 +24,6 @@
 
 namespace kevlar{
 
-  class PDGNameNotFound: public std::exception
-  {
-    virtual const char* what() const throw()
-    {
-      return "Name in particle label vector is not in PDG DB";
-    }
-  };
   class MotherNotFound: public std::exception
   {
     virtual const char* what() const throw()
@@ -40,7 +31,6 @@ namespace kevlar{
       return "Primary Mother particle not found.";
     }
   };
-
 
   HDF5VertexPlaneProjection::HDF5VertexPlaneProjection(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
@@ -69,16 +59,6 @@ namespace kevlar{
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5VertexPlaneProjection default c'tor for module: "<<this->fDataSetName<<std::endl;
-      /*
-      auto pdg_table = TDatabasePDG::Instance();
-      for(std::vector<std::string>::iterator it = fLabels.begin(); it!=fLabels.end(); ++it){
-        if(! pdg_table->GetParticle((*it).c_str())){
-          std::cerr<<"Particle name in HDF5VertexPlaneProjection config is NOT in PDG DB: "<<*it<<std::endl;
-          throw PDGNameNotFound();
-        }
-      }
-      */
   }
 
   HDF5VertexPlaneProjection::~HDF5VertexPlaneProjection()
@@ -90,11 +70,6 @@ namespace kevlar{
   {
     
     art::ServiceHandle<geo::Geometry> geo;
-    //TimeService
-    //    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
-
-    //    tss->preProcessEvent(evt);
-    // auto const* ts = tss->provider();
 
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     double vd = detprop->DriftVelocity(); //cm/musec
@@ -119,31 +94,45 @@ namespace kevlar{
           continue;
         std::string name = particle->GetName();
 
-	int Wire[3] = {0,0,0};
+        int Wire[3] = {0,0,0};
 
 
-	for (auto const& mcpdk : mcpdks ) {
-	if ( mcpdk->Process() == "primary" )
-	  {
-	    std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
-	    TLorentzVector xyzt = mcpdk->Position();
-	    const TVector3 xyz = mcpdk->Position().Vect();
-	    for (size_t ii=0; ii<3; ii++) 
-	      {
-		Wire[ii] = geo->NearestWire( xyz, ii);
-		//		std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
-	      }
+        for (auto const& mcpdk : mcpdks ) {
+    std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
+    if ( mcpdk->Process() == "primary" )
+      {
+        //        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+        TLorentzVector xyzt = mcpdk->Position();
+        const TVector3 xyz = mcpdk->Position().Vect();
+        bool meh(false);
+        for (size_t ii=0; ii<3; ii++) 
+    {
 
-	    double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
-		  
-	    for (int index=0; index<3; index++ )
-	      fBuffer[fBufferCounter][index] = (double) Wire[index];
-	    fBuffer[fBufferCounter][3] = Time;
-	    mother = true;
-	    break; // we only want the one pdk info
-	  } //primary
-	} // mcpdks
-	if (mother) break;
+      try
+        {        
+          Wire[ii] = geo->NearestWire( xyz, ii);
+        }
+      catch(cet::exception& e )
+        {
+          meh = true;
+        }
+      if (!meh)
+        std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
+    }
+        
+        double Time = 3200.;
+        if (!meh)
+          Time += xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+              
+        for (int index=0; index<3; index++ )
+          fBuffer[fBufferCounter][index] = (double) Wire[index];
+        fBuffer[fBufferCounter][3] = Time;
+        mother = true;
+        break; // we only want the one pdk info
+      } //primary
+        } // mcpdks
+        if (mother) break;
       } // truth particles
       if (mother) break;
     }   // truth bundles in handle
@@ -156,10 +145,9 @@ namespace kevlar{
     else{
       std::cout << "";
       for (int index=0; index<4; index++ )
-	std::cout << fBuffer[fBufferCounter][index] << ", ";
-      std::cout << "." << std::endl;
+  std::cout << fBuffer[fBufferCounter][index] << ", ";
+      std::cout << "" << std::endl;
     }
-
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
@@ -189,7 +177,7 @@ namespace kevlar{
   void HDF5VertexPlaneProjection::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    std::string group_name = "label2";
+    std::string group_name = "label";
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);

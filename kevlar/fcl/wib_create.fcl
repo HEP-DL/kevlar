@@ -1,10 +1,9 @@
-#include "default_hdf5.fcl"
+#include "default_wib.fcl"
 #include "services_microboone_simulation.fcl"
 
-process_name: HDF5Converter
+process_name: WIBFrames
 
 services: {
-  HDF5File: @local::HDF5File
   @table::microboone_simulation_services
 }
 
@@ -20,16 +19,10 @@ source: {
 }
 
 physics: {
-  
   analyzers: {
-    tpcimage: @local::rawDigits
-    wires: @local::wires
-    particlelabels: @local::particleLabels
-    vtxproj: @local::vtxprojLabels
-    semanticSegments : @local::semanticSegments
+    wibframes: @local::rawDigits
   }
-
-  ana: [wires, particlelabels, semanticSegments ] #tpcimage, vtxproj, 
+  ana: [ wibframes ]
 
   end_paths: [ana]
 }
