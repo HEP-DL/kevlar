@@ -1,0 +1,29 @@
+#include "default_wib.fcl"
+#include "services_microboone_simulation.fcl"
+
+process_name: WIBFrames
+
+services: {
+  @table::microboone_simulation_services
+}
+
+services.DetectorPropertiesService.NumberTimeSamples:        6400
+services.DetectorPropertiesService.ReadOutWindowSize:        6400
+services.DetectorClocksService.InheritClockConfig:           false
+services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
+services.DetectorClocksService.TrigModuleName:               "daq"
+
+source: {
+  module_type: RootInput
+  maxEvents:  -1
+}
+
+physics: {
+  analyzers: {
+    wibframes: @local::rawDigits
+  }
+  ana: [ wibframes ]
+
+  end_paths: [ana]
+}
+  

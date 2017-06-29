@@ -58,8 +58,6 @@ namespace kevlar{
 
   void HDF5ParticleLabelSS::analyze(art::Event const & evt)
   {
-
-
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     double vd = detprop->DriftVelocity(); //cm/musec
     art::ServiceHandle<geo::Geometry> geo;

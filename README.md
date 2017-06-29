@@ -10,6 +10,8 @@ This requires the `uboonecode` UPS environment exist with UPS setup. In addition
 
 >> Note: This will be relaxed in future versions. Currently, this is implemented as an R&D project on MicroBooNE, but the intended scope is LArSoft oriented.
 
+>> Note: This will be relaxed in future versions. Currently, this is implemented as an R&D project on MicroBooNE, but the intended scope is LArSoft oriented.
+
 ## Installation
 
 1. Setup your local environment via ups

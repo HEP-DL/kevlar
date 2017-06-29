@@ -24,6 +24,10 @@ namespace kevlar{
 
   class HDF5ParticleLabelSS : public art::EDAnalyzer {
     std::string fProducerName;
+<<<<<<< HEAD
+=======
+    std::string fG4Name;
+>>>>>>> 6b2e37a4769cdc2aa1ade04318c91a086d55ab33
     std::string fDataSetName;
     std::vector<std::string> fLabels ;
     hsize_t fDims[2];// Dataset dimensions
