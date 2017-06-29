@@ -1,4 +1,4 @@
-#include "kevlar/Converters/HDF5Label.hh"
+#include "kevlar/Converters/HDF5ParticleLabelVector.hh"
 #include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
@@ -29,7 +29,7 @@ namespace kevlar{
   };
 
 
-  HDF5Label::HDF5Label(fhicl::ParameterSet const & pSet):
+  HDF5ParticleLabelVector::HDF5ParticleLabelVector(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
@@ -55,35 +55,31 @@ namespace kevlar{
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5Label default c'tor for module: "<<this->fDataSetName<<std::endl;
+      std::cout<<"Finished with HDF5ParticleLabelVector default c'tor for module: "<<this->fDataSetName<<std::endl;
       for(std::vector<std::string>::iterator it = fLabels.begin(); it!=fLabels.end(); ++it){
         if(! TDatabasePDG::Instance()->GetParticle((*it).c_str())){
-          std::cerr<<"Particle name in HDF5Label config is NOT in PDG DB: "<<*it<<std::endl;
+          std::cerr<<"Particle name in HDF5ParticleLabelVector config is NOT in PDG DB: "<<*it<<std::endl;
           throw PDGNameNotFound();
         }
       }
   }
 
-  HDF5Label::~HDF5Label()
+  HDF5ParticleLabelVector::~HDF5ParticleLabelVector()
   {
 
   }
 
-  void HDF5Label::analyze(art::Event const & evt)
+  void HDF5ParticleLabelVector::analyze(art::Event const & evt)
   {
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
-    std::cout<<"HDF5Label:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle){
       for(int i=0; i<truth.NParticles(); ++i){
         int pdg = truth.GetParticle(i).PdgCode();
-        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
-        auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
-        if(!particle)
-          continue;
-        std::string name = particle->GetName();
-
+	if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
+        std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
 
@@ -102,7 +98,7 @@ namespace kevlar{
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
-    std::cout<<"HDF5Label Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
+    std::cout<<"HDF5ParticleLabelVector Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
 
@@ -115,17 +111,17 @@ namespace kevlar{
       filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
 
       H5::DataSpace memspace(2, fChunkDims);
-      std::cout<<"HDF5Label:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
+      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
                               memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
-      std::cout<<"HDF5Label:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
+      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
     }
 
   }
   
-  void HDF5Label::beginSubRun(art::SubRun const &)
+  void HDF5ParticleLabelVector::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
     std::string group_name = "label";
@@ -165,7 +161,7 @@ namespace kevlar{
     }
   }
 
-  void HDF5Label::endSubRun(art::SubRun const & sr)
+  void HDF5ParticleLabelVector::endJob()
   {
     return;
     if(!(this->fBufferCounter==0)){

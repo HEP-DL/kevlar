@@ -26,9 +26,10 @@ source: {
 physics: {
   analyzers: {
     tpcimage: @local::tpcImage
-#    particlelabels : @local::particleLabels
+    particlelabels: @local::particleLabels
   }
-  ana: [tpcimage]#, particlelabels]
+  ana: [tpcimage, particlelabels ]
   end_paths: [ana]
 }
   
+physics.analyzers.particlelabels.labels: ["e-","e+","proton","pi0","pi+","pi-","mu-","mu+","K+"]

@@ -1,4 +1,4 @@
-#include "kevlar/Converters/HDF5Image.hh"
+#include "kevlar/Converters/HDF5RawDigits.hh"
 #include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
@@ -14,7 +14,7 @@
 
 namespace kevlar{
 
-  HDF5Image::HDF5Image(fhicl::ParameterSet const & pSet):
+  HDF5RawDigits::HDF5RawDigits(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","daq")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","rawdigits")),
@@ -47,21 +47,21 @@ namespace kevlar{
       fParms.setChunk( 4, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5Image default c'tor for module: "<<this->fDataSetName<<std::endl;
+      std::cout<<"Finished with HDF5RawDigits default c'tor for module: "<<this->fDataSetName<<std::endl;
   }
 
-  HDF5Image::~HDF5Image()
+  HDF5RawDigits::~HDF5RawDigits()
   {
 
   }
 
-  void HDF5Image::analyze(art::Event const & evt)
+  void HDF5RawDigits::analyze(art::Event const & evt)
   {
 
     //Grab the rela
     art::Handle<std::vector<raw::RawDigit> > digits;
     art::ServiceHandle<geo::Geometry> geo;
-    std::cout<<"HDF5Image:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5RawDigits:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
 
     evt.getByLabel(fProducerName, digits);
     for (auto digitContainer: *digits){
@@ -93,7 +93,7 @@ namespace kevlar{
     (this->fBufferCounter)++;
     (this->fNEvents)++;
 
-    std::cout<<"HDF5Image Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
+    std::cout<<"HDF5RawDigits Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
       hsize_t newSize[4] = {this->fNEvents,fDims[1],fDims[2],fDims[3]};
@@ -105,16 +105,16 @@ namespace kevlar{
       filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
 
       H5::DataSpace memspace(4, this->fChunkDims);
-      std::cout<<"HDF5Image:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
+      std::cout<<"HDF5RawDigits:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 4>(boost::extents[fChunkDims[0]][fChunkDims[1]][fChunkDims[2]][fChunkDims[3]]);
-      std::cout<<"HDF5Image:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
+      std::cout<<"HDF5RawDigits:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
     }
 
   }
   
-  void HDF5Image::beginSubRun(art::SubRun const &)
+  void HDF5RawDigits::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
     std::string group_name = "image";
@@ -169,7 +169,7 @@ namespace kevlar{
 
   }
 
-  void HDF5Image::endSubRun(art::SubRun const & sr)
+  void HDF5RawDigits::endJob()
   {
 
     if(!(this->fBufferCounter==0)){
