@@ -1,4 +1,4 @@
-#include "kevlar/Converters/HDF5ParticleLabelVector.hh"
+#include "kevlar/Converters/HDF5VertexPlaneProjection.hh"
 #include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
@@ -29,7 +29,7 @@ namespace kevlar{
   };
 
 
-  HDF5ParticleLabelVector::HDF5ParticleLabelVector(fhicl::ParameterSet const & pSet):
+  HDF5VertexPlaneProjection::HDF5VertexPlaneProjection(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
       fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
@@ -55,34 +55,38 @@ namespace kevlar{
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
       fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
-      std::cout<<"Finished with HDF5ParticleLabelVector default c'tor for module: "<<this->fDataSetName<<std::endl;
+      std::cout<<"Finished with HDF5VertexPlaneProjection default c'tor for module: "<<this->fDataSetName<<std::endl;
       /*
       auto pdg_table = TDatabasePDG::Instance();
       for(std::vector<std::string>::iterator it = fLabels.begin(); it!=fLabels.end(); ++it){
         if(! pdg_table->GetParticle((*it).c_str())){
-          std::cerr<<"Particle name in HDF5ParticleLabelVector config is NOT in PDG DB: "<<*it<<std::endl;
+          std::cerr<<"Particle name in HDF5VertexPlaneProjection config is NOT in PDG DB: "<<*it<<std::endl;
           throw PDGNameNotFound();
         }
       }
       */
   }
 
-  HDF5ParticleLabelVector::~HDF5ParticleLabelVector()
+  HDF5VertexPlaneProjection::~HDF5VertexPlaneProjection()
   {
 
   }
 
-  void HDF5ParticleLabelVector::analyze(art::Event const & evt)
+  void HDF5VertexPlaneProjection::analyze(art::Event const & evt)
   {
     
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
-    std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle){
       for(int i=0; i<truth.NParticles(); ++i){
         int pdg = truth.GetParticle(i).PdgCode();
-	if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
-        std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
+        if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
+        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+        auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
+        if(!particle)
+          continue;
+        std::string name = particle->GetName();
 
         ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
 
@@ -100,7 +104,7 @@ namespace kevlar{
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
-    std::cout<<"HDF5ParticleLabelVector Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
 
@@ -113,17 +117,17 @@ namespace kevlar{
       filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
 
       H5::DataSpace memspace(2, fChunkDims);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
+      std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
                               memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
+      std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
     }
 
   }
   
-  void HDF5ParticleLabelVector::beginJob()
+  void HDF5VertexPlaneProjection::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
     std::string group_name = "label";
@@ -163,7 +167,7 @@ namespace kevlar{
     }
   }
 
-  void HDF5ParticleLabelVector::endJob()
+  void HDF5VertexPlaneProjection::endJob()
   {
     if(!(this->fBufferCounter==0)){
       // The new size is now the number of  events in the file
