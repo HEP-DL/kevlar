@@ -171,7 +171,7 @@ namespace kevlar{
   {
 
     if(!(this->fBufferCounter==0)){
-
+      // The new size is now the number of  events in the file
       hsize_t newSize[4] = {this->fNEvents,fDims[1],fDims[2],fDims[3]};
       this->fDataSet->extend( newSize );
 

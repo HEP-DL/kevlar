@@ -6,7 +6,9 @@ HDF5 export utilities for LArSoft.
 
 ## Requirements
 
-This requires the `uboonecode` UPS environment exist with UPS setup. In addition, the [HDF5 UPS](https://github.com/kwierman/hdf5) package will need to be built and installed in the product path. This needs to be done _before_ the following steps as the HDF5 Cmake Environment doesn't interact well with CETBuildTools during the configuration phase.
+This requires the `uboonecode` UPS environment exist with UPS setup. In addition, the [HEP-DL HDF5 UPS package](https://github.com/kwierman/hdf5) will need to be built and installed in the product path. This needs to be done _before_ the following steps as the HDF5 Cmake Environment doesn't interact well with CETBuildTools during the configuration phase. Bear in mind that unless the HDF5 package is built with zlib support, the build will fail.
+
+>> Note: This will be relaxed in future versions. Currently, this is implemented as an R&D project on MicroBooNE, but the intended scope is LArSoft oriented.
 
 >> Note: This will be relaxed in future versions. Currently, this is implemented as an R&D project on MicroBooNE, but the intended scope is LArSoft oriented.
 
