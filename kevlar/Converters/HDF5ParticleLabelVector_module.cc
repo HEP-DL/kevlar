@@ -1,17 +1,8 @@
 #include "kevlar/Converters/HDF5ParticleLabelVector.hh"
 #include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
-<<<<<<< HEAD
 #include "fhiclcpp/ParameterSet.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
-=======
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
->>>>>>> 6b2e37a4769cdc2aa1ade04318c91a086d55ab33
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "TDatabasePDG.h"
 
