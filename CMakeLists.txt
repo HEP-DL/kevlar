@@ -1,24 +1,7 @@
-# ======================================================================
-#  kevlar main build file
-#
-#  cd .../path/to/build/directory
-#  source .../path/to/kevlar/ups/setup_for_development <-d|-p>
-#  cmake [-DCMAKE_INSTALL_PREFIX=/install/path]
-#        -DCMAKE_BUILD_TYPE=$CETPKG_TYPE
-#        $CETPKG_SOURCE
-#  make
-#  make test
-#  make install
-#  make package (builds distribution tarfile)
-# ======================================================================
-
-
-# use cmake 2.8 or later
 cmake_minimum_required (VERSION 2.8)
 
 project(kevlar)
 
-# cetbuildtools contains our cmake modules
 SET ( CETBUILDTOOLS_VERSION $ENV{CETBUILDTOOLS_VERSION} )
 IF (NOT CETBUILDTOOLS_VERSION)
     MESSAGE (FATAL_ERROR "ERROR: setup cetbuildtools to get the cmake modules")
@@ -39,7 +22,6 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
 
 cet_report_compiler_flags()
 
-# these are minimum required versions, not the actual product versions
 find_ups_product( lardataobj v1_00_00 )
 find_ups_product( larsim v1_00_00 )
 find_ups_product( art v1_08_00 )
@@ -54,19 +36,11 @@ cet_find_library( hdf5_hl NAMES hdf5_hl_debug hdf5_hl-shared hdf5_hl_opt PATHS $
 cet_find_library( hdf5_tools NAMES hdf5_tools_debug hdf5_tools-shared hdf5_tools_opt PATHS ${HDF5_SEARCH_PATH}/lib ${hdf5_DIR}/../../ NO_DEFAULT_PATH  )
 set(HDF5_LIBRARIES ${hdf5} ${hdf5_cpp} ${hdf5_hl} ${hdf5_tools} )
 
-# macros for dictionary and simple_plugin
 include(ArtDictionary)
 include(ArtMake)
 include(BuildPlugins)
 
-# ADD SOURCE CODE SUBDIRECTORIES HERE
 add_subdirectory(kevlar)
-
-# tests
 add_subdirectory(test)
-
-# ups - table and config files
 add_subdirectory(ups)
-
-# packaging utility
 include(UseCPack)

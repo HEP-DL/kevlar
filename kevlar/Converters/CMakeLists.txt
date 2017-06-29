@@ -52,6 +52,19 @@ simple_plugin( HDF5VertexPlaneProjection module
   BASENAME_ONLY
 )
 
+#Semantic Segmentation by particle label
+simple_plugin( HDF5ParticleLabelSS module
+    HDF5File_service
+    ${ART_FRAMEWORK_PRINCIPAL}
+    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    larcore_Geometry
+    nusimdata_SimulationBase
+    ${ROOT_BASIC_LIB_LIST}
+    ${ROOT_EG}
+    ${HDF5_LIBRARIES}
+  BASENAME_ONLY
+)
+
 install_headers()
 install_source()
 install_fhicl()

@@ -5,10 +5,8 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable    
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
 
@@ -72,11 +70,6 @@ namespace kevlar{
   {
     
     art::ServiceHandle<geo::Geometry> geo;
-    //TimeService
-    //    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
-
-    //    tss->preProcessEvent(evt);
-    // auto const* ts = tss->provider();
 
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     double vd = detprop->DriftVelocity(); //cm/musec
@@ -105,39 +98,35 @@ namespace kevlar{
 
 
         for (auto const& mcpdk : mcpdks ) {
-	  std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
-	  std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
-	  if ( mcpdk->Process() == "primary" )
-	    {
-	      //	      std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
-	      TLorentzVector xyzt = mcpdk->Position();
-	      const TVector3 xyz = mcpdk->Position().Vect();
-	      bool meh(false);
-	      for (size_t ii=0; ii<3; ii++) 
-		{
-
-		  try
-		    {		    
-		      Wire[ii] = geo->NearestWire( xyz, ii);
-		    }
-		  catch(cet::exception& e )
-		    {
-		      meh = true;
-		    }
-		  if (!meh)
-		    std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
-		}
-	      
-	      double Time = 3200.;
-	      if (!meh)
-		Time += xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+    std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
+    if ( mcpdk->Process() == "primary" )
+      {
+        //        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+        TLorentzVector xyzt = mcpdk->Position();
+        const TVector3 xyz = mcpdk->Position().Vect();
+        for (size_t ii=0; ii<3; ii++) 
+        {
+            //ERIC: This is where the code breaks
+          try
+          {
+            Wire[ii] = geo->NearestWire( xyz, ii);
+          }
+          catch(cet::exception& e )
+          {
+            Wire[ii] = 0;
+          }          
+          std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
+        }
+        
+        double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
               
-	      for (int index=0; index<3; index++ )
-		fBuffer[fBufferCounter][index] = (double) Wire[index];
-	      fBuffer[fBufferCounter][3] = Time;
-	      mother = true;
-	      break; // we only want the one pdk info
-	    } //primary
+        for (int index=0; index<3; index++ )
+          fBuffer[fBufferCounter][index] = (double) Wire[index];
+        fBuffer[fBufferCounter][3] = Time;
+        mother = true;
+        break; // we only want the one pdk info
+      } //primary
         } // mcpdks
         if (mother) break;
       } // truth particles
@@ -152,7 +141,7 @@ namespace kevlar{
     else{
       std::cout << "";
       for (int index=0; index<4; index++ )
-	std::cout << fBuffer[fBufferCounter][index] << ", ";
+  std::cout << fBuffer[fBufferCounter][index] << ", ";
       std::cout << "" << std::endl;
     }
 
@@ -184,7 +173,7 @@ namespace kevlar{
   void HDF5VertexPlaneProjection::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    std::string group_name = "label2";
+    std::string group_name = "label";
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
