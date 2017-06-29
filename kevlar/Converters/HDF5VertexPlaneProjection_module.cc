@@ -98,32 +98,32 @@ namespace kevlar{
 
 
         for (auto const& mcpdk : mcpdks ) {
-	  std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
-	  std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
-	  if ( mcpdk->Process() == "primary" )
-	    {
-	      //	      std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
-	      TLorentzVector xyzt = mcpdk->Position();
-	      const TVector3 xyz = mcpdk->Position().Vect();
-	      bool meh(false);
-	      for (size_t ii=0; ii<3; ii++) 
-		{
+    std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection: Process() of this particle: :"<<  mcpdk->Process() <<std::endl;
+    if ( mcpdk->Process() == "primary" )
+      {
+        //        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+        TLorentzVector xyzt = mcpdk->Position();
+        const TVector3 xyz = mcpdk->Position().Vect();
+        bool meh(false);
+        for (size_t ii=0; ii<3; ii++) 
+    {
 
-		  try
-		    {		    
-		      Wire[ii] = geo->NearestWire( xyz, ii);
-		    }
-		  catch(cet::exception& e )
-		    {
-		      meh = true;
-		    }
-		  if (!meh)
-		    std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
-		}
-	      
-	      double Time = 3200.;
-	      if (!meh)
-		Time += xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+      try
+        {        
+          Wire[ii] = geo->NearestWire( xyz, ii);
+        }
+      catch(cet::exception& e )
+        {
+          meh = true;
+        }
+      if (!meh)
+        std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
+    }
+        
+        double Time = 3200.;
+        if (!meh)
+          Time += xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
               
         for (int index=0; index<3; index++ )
           fBuffer[fBufferCounter][index] = (double) Wire[index];
