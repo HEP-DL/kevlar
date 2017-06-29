@@ -55,8 +55,8 @@ vtxprojLabels:{
 semanticSegments: {
   module_type: "HDF5ParticleLabelSS"
   Labels: @local::hdf5labels
-  ProducerLabel: "generator"
-  DataSetLabel: "segments"
+  ProducerLabel: "largeant"
+  DataSetLabel: "type"
   ChunkSize: 1
   FillValue: 0
   CompressionLevel: 7

@@ -5,7 +5,7 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larcore/Geometry/Geometry.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
@@ -29,36 +29,27 @@ namespace kevlar{
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
         0, 
-        0,
-        fLabels.size(),
-        3,
-        2
+        6,
       },
-      //Index: [event, instance, particle, plane, coordinate]
+      //Index: [event, instance, particle, plane, wire, time]
       fMaxDims{
         H5S_UNLIMITED,
-        H5S_UNLIMITED, 
-        fLabels.size(),
-        3,
-        2
+        6
       },
       fChunkDims{
         pSet.get<uint32_t>("ChunkSizeN",1),
-        pSet.get<uint32_t>("ChunkSizeM",1),
-        fLabels.size(),
-        3,
-        2
+        6
       },
-      fDataSpace(5, fDims, fMaxDims),
+      fDataSpace(2, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
       fNEvents(0),
       fNInstances(0)
   {
-      fParms.setChunk( 5, fChunkDims );
+      fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
-      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",5));
+      fParms.setDeflate(pSet.get<uint32_t>("CompressionLevel",7));
   }
 
   HDF5ParticleLabelSS::~HDF5ParticleLabelSS()
@@ -72,117 +63,86 @@ namespace kevlar{
     double vd = detprop->DriftVelocity(); //cm/musec
     art::ServiceHandle<geo::Geometry> geo;
 
-    std::vector<std::vector<std::vector<std::pair<int, int> > > > eventBuffer;
-    //indices are particle_type, plane, instance, coordinate
-    for(size_t i=0; i<fLabels.size(); ++i)
-    {
-      eventBuffer.push_back(std::vector<std::vector<std::pair<int, int> > >());
-      for(size_t j=0; j<3; ++j)
-        eventBuffer[i].push_back(std::vector<std::pair<int, int> >() );
-    }
+    (this->fNEvents)++;
 
 
-    art::Handle< std::vector< simb::MCTruth > > mct_handle;
-    std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    art::Handle< std::vector< simb::MCParticle > > mct_handle;
+    std::cout<<"HDF5ParticleLabelSS:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle)
     {
-      for(int i=0; i<truth.NParticles(); ++i)
+
+      int pdg = truth.PdgCode();
+      auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
+      if(!particle)  continue;
+      std::string name = particle->GetName();
+      ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
+
+      if(index < int(fLabels.size()) && index>=0 )
       {
-        int pdg = truth.GetParticle(i).PdgCode();
-        auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
-        if(!particle)
-          continue;
-        std::string name = particle->GetName();
-        ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
+        std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
+        int tmp_instances=0;
 
-        if(index < int(fLabels.size()) && index>=0 )
+        for (auto traj = truth.Trajectory().begin() ; traj != truth.Trajectory().end(); ++traj )
         {
-          std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
-          //Now that we have a particle, let's get a trajectory and use that to fill tree
-          for (auto traj = truth.GetParticle(i).Trajectory().begin() ; traj != truth.GetParticle(i).Trajectory().end(); ++traj )
+          const TVector3 position = traj->first.Vect();
+          bool foundWires=true;
+          int wire[3]={0,0,0};
+          for(size_t plane=0; plane < 3; plane++)
           {
-            const TVector3 position = traj->first.Vect();
-            unsigned* wire = new unsigned[3];
-            bool foundWires=true;
-            for(size_t plane=0;plane<3;plane++ )
+            try
             {
-              try
-              {
-                wire[plane] = geo->NearestWire( position, plane);
-              }
-              catch(cet::exception& e )
-              {
-                foundWires=false;
-              }
+              wire[plane] = geo->NearestWire( position, plane);
             }
-            double time = 3200. + traj->first[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
-
-            if(foundWires)
+            catch(cet::exception& e )
             {
-              for(size_t plane=0;plane<3;++plane)
-              {
-                eventBuffer.at(index).at(plane).push_back(std::make_pair(wire[plane], time));
-                if(eventBuffer.at(index).at(plane).size()>this->fNInstances)
-                {
-                  this->fNInstances = eventBuffer.at(index).at(plane).size();
-                  std::cout<<"HDF5ParticleLabelSS: Resizing Instance index to "<<this->fNInstances<<std::endl;
-                }
-              }
+              std::cout<<"Could NOT find nearest Wire to: "<<position[0]<<" "<<position[1]<<" "<<position[2]<<std::endl;
+              foundWires=false;
             }
+          }
+          int time = 3200. + traj->first[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+          if(foundWires)
+          {
+            for(size_t plane=0;plane<3;++plane)
+            {
+              boost::multi_array<int, 2>  buffer(boost::extents[1][6]);
+              buffer[0][0] = fNEvents;
+              buffer[0][1] = tmp_instances++;
+              buffer[0][2] = index;
+              buffer[0][3] = plane;
+              buffer[0][4] = wire[plane];
+              buffer[0][5] = time;
+              this->fNInstances++;
+              std::cout<<wire[plane]<<" "<<time<<std::endl;
 
-            delete[] wire;
+
+              fChunkDims[0] = this->fNInstances* this->fNEvents;
+              hsize_t hyperslabSize[2] = { 1,6 };
+              hsize_t newSize[2] = { this->fNInstances, 6 };
+              this->fDataSet->extend( newSize );
+              H5::DataSpace filespace(this->fDataSet->getSpace());
+              hsize_t offset[2]={this->fNInstances-1,0};
+              filespace.selectHyperslab( H5S_SELECT_SET, hyperslabSize, offset );
+              H5::DataSpace memspace(2, hyperslabSize);
+
+              std::cout<<"HDF5ParticleLabelSS: "<<this->fDataSetName<<" writing buffer to file" << std::endl;
+              this->fDataSet->write( buffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
+              std::cout<<"HDF5ParticleLabelSS: "<<this->fDataSetName<<" finished resetting buffer" << std::endl;
+
+            }
           }
         }
-        else
-        {
-          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;
-        }
       }
-    }
-    //alright, now that we've got the event buffer, it's time to empty into the real buffer.
-    //first, resize the real buffer if the dimensions are larger
-    boost::multi_array<int, 5>  buffer(boost::extents[1][this->fNInstances][fLabels.size()][3][2]);
-    (this->fNEvents)++;
-    for(unsigned i=0; i < eventBuffer.size(); ++i)//particle type
-    {
-      for(unsigned j=0; j < eventBuffer[i].size(); ++j)//plane
+      else
       {
-        for(unsigned k=0; k < eventBuffer[i][j].size(); ++k)//instance
-        {
-          buffer[0][k][i][j][0] = eventBuffer[i][j][k].first;
-          buffer[0][k][i][j][1] = eventBuffer[i][j][k].second;
-        }
+        std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;
       }
+      
     }
 
-    fChunkDims[1] = this->fNInstances;
-    hsize_t hyperslabSize[5] = { 1, this->fNInstances, fLabels.size(), 3, 2 };
-    hsize_t newSize[5] = { this->fNEvents, this->fNInstances, fLabels.size(), 3, 2 };
-    this->fDataSet->extend( newSize );
-    H5::DataSpace filespace(this->fDataSet->getSpace());
-    hsize_t offset[5]={this->fNEvents-1,0,0,0,0};
-    filespace.selectHyperslab( H5S_SELECT_SET, hyperslabSize, offset );
-    H5::DataSpace memspace(5, hyperslabSize);
 
-    std::cout<<"hyperslab size: ";
-    for(int i=0; i<5;i++)std::cout<<hyperslabSize[i]<<" ";
-      std::cout<<std::endl;
-
-    std::cout<<"new size: ";
-    for(int i=0; i<5;i++)std::cout<<newSize[i]<<" ";
-      std::cout<<std::endl;
-
-    std::cout<<"offset: ";
-    for(int i=0; i<5;i++)std::cout<<offset[i]<<" ";
-      std::cout<<std::endl;
-
-    std::cout<<this->fDataSet<<std::endl;
-
-    std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" writing buffer to file" << std::endl;
-    this->fDataSet->write( buffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
-    std::cout<<"Semantic Segmenter:"<<this->fDataSetName<<" finished resetting buffer" << std::endl;
   }
+
   
   void HDF5ParticleLabelSS::beginJob()
   {
@@ -264,3 +224,8 @@ namespace kevlar{
     }
   }
 }
+
+
+
+
+

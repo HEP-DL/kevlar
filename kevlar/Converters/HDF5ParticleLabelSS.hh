@@ -27,15 +27,16 @@ namespace kevlar{
     std::string fG4Name;
     std::string fDataSetName;
     std::vector<std::string> fLabels ;
-    hsize_t fDims[5];// Dataset dimensions
-    hsize_t fMaxDims[5];// Maximum Data Dimensions
-    hsize_t fChunkDims[5];// Chunk Dimensions
+    hsize_t fDims[2];// Dataset dimensions
+    hsize_t fMaxDims[2];// Maximum Data Dimensions
+    hsize_t fChunkDims[2];// Chunk Dimensions
     H5::DataSpace fDataSpace;/// Buffer
     H5::DSetCreatPropList fParms;// IO Parameters
     H5::DataSet* fDataSet;// points at dataset
     int fFillValue;
     uint32_t fNEvents;// dimension in event space
     uint32_t fNInstances;// dimension in instance space
+
   public:
     HDF5ParticleLabelSS(::fhicl::ParameterSet const& );
     ~HDF5ParticleLabelSS();
