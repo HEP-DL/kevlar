@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <sstream>
 
-
 namespace kevlar{
 
 
@@ -44,7 +43,8 @@ namespace kevlar{
       fDataSet(NULL),
       fFillValue(pSet.get<uint32_t>("FillValue",0)),
       fNEvents(0),
-      fNInstances(0)
+      fNInstances(0),
+      fNInterpolations(pSet.get<uint32_t>("NInterpolations",100))
   {
       fParms.setChunk( 2, fChunkDims );
       fParms.setFillValue( H5::PredType::NATIVE_INT, &fFillValue);
@@ -65,7 +65,7 @@ namespace kevlar{
     (this->fNEvents)++;
 
     art::Handle< std::vector< simb::MCParticle > > mct_handle;
-    std::cout<<"HDF5ParticleLabelSS:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    mf::LogInfo( "HDF5ParticleLabelSS" )<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
     for (auto truth: *mct_handle)
     {
@@ -78,12 +78,15 @@ namespace kevlar{
 
       if(index < int(fLabels.size()) && index>=0 )
       {
-        std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
+        mf::LogInfo( "HDF5ParticleLabelSS" )<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
         int tmp_instances=0;
+
+        auto prev_traj = truth.Trajectory().begin();
 
         for (auto traj = truth.Trajectory().begin() ; traj != truth.Trajectory().end(); ++traj )
         {
           const TVector3 position = traj->first.Vect();
+
           bool foundWires=true;
           int wire[3]={0,0,0};
           for(size_t plane=0; plane < 3; plane++)
@@ -94,11 +97,11 @@ namespace kevlar{
             }
             catch(cet::exception& e )
             {
-              std::cout<<"Could NOT find nearest Wire to: "<<position[0]<<" "<<position[1]<<" "<<position[2]<<std::endl;
+              mf::LogInfo( "HDF5ParticleLabelSS" )<<"Could NOT find nearest Wire to: "<<position[0]<<" "<<position[1]<<" "<<position[2]<<std::endl;
               foundWires=false;
             }
           }
-          int time = 3200. + traj->first[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+          int time = 3200. + traj->first[0]/vd; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
           if(foundWires)
           {
             for(size_t plane=0;plane<3;++plane)
@@ -111,8 +114,7 @@ namespace kevlar{
               buffer[0][4] = wire[plane];
               buffer[0][5] = time;
               this->fNInstances++;
-              std::cout<<wire[plane]<<" "<<time<<std::endl;
-
+              mf::LogInfo( "HDF5ParticleLabelSS" )<<wire[plane]<<" "<<time<<std::endl;
 
               fChunkDims[0] = this->fNInstances* this->fNEvents;
               hsize_t hyperslabSize[2] = { 1,6 };
@@ -123,17 +125,27 @@ namespace kevlar{
               filespace.selectHyperslab( H5S_SELECT_SET, hyperslabSize, offset );
               H5::DataSpace memspace(2, hyperslabSize);
 
-              std::cout<<"HDF5ParticleLabelSS: "<<this->fDataSetName<<" writing buffer to file" << std::endl;
+              mf::LogInfo( "HDF5ParticleLabelSS" )<<this->fDataSetName<<" writing buffer to file" << std::endl;
               this->fDataSet->write( buffer.data(), H5::PredType::NATIVE_INT, memspace, filespace );
-              std::cout<<"HDF5ParticleLabelSS: "<<this->fDataSetName<<" finished resetting buffer" << std::endl;
+              mf::LogInfo( "HDF5ParticleLabelSS" )<<this->fDataSetName<<" finished resetting buffer" << std::endl;
 
             }
           }
+          if(traj != truth.Trajectory().begin())
+          {
+            for(uint32_t interp =1 ; interp<fNInterpolations;++interp)
+            {
+
+            }
+
+            prev_traj = traj;
+          }
+
         }
       }
       else
       {
-        std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;
+        mf::LogInfo( "HDF5ParticleLabelSS" )<<"Found Particle Outside Label Table: "<<name<<std::endl;
       }
       
     }

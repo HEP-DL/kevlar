@@ -34,7 +34,7 @@ wires: {
 particleLabels:{
   module_type: "HDF5ParticleLabelVector"
   Labels: @local::hdf5labels
-  ProducerLabel: "generator"
+  ProducerLabel: "largeant"
   DataSetLabel: "type"
   ChunkSize: 10
   FillValue: 0

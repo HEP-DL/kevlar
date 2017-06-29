@@ -35,6 +35,7 @@ namespace kevlar{
     int fFillValue;
     uint32_t fNEvents;// dimension in event space
     uint32_t fNInstances;// dimension in instance space
+    uint32_t fNInterpolations;
 
   public:
     HDF5ParticleLabelSS(::fhicl::ParameterSet const& );

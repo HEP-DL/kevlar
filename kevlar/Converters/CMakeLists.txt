@@ -1,6 +1,7 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
 include_directories( ${HDF5_INC} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../Framework )
 
 #HDF5 Image Converter
 simple_plugin( HDF5RawDigits module
@@ -63,6 +64,7 @@ simple_plugin( HDF5ParticleLabelSS module
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
     ${HDF5_LIBRARIES}
+    ${MF_MESSAGELOGGER}
   BASENAME_ONLY
 )
 

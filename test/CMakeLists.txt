@@ -1,6 +1,4 @@
-# cmake driver file for testing
-
-# Enable asserts
+include(CetTest)
 cet_enable_asserts()
 
 # Add test items here

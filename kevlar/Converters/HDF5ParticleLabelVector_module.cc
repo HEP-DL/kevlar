@@ -18,8 +18,6 @@ namespace kevlar{
 
   HDF5ParticleLabelVector::HDF5ParticleLabelVector(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
-      fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
         0, 
@@ -31,6 +29,8 @@ namespace kevlar{
       fChunkDims{
         pSet.get<uint32_t>("ChunkSize",1), fLabels.size()
       },
+      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
+      fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fDataSpace(2, fDims, fMaxDims),
       fParms(),
       fDataSet(NULL),

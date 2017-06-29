@@ -29,7 +29,7 @@ physics: {
     semanticSegments : @local::semanticSegments
   }
 
-  ana: [wires, particlelabels, semanticSegments, tpcimage, vtxproj]
+  ana: [wires, particlelabels, semanticSegments, vtxproj]
 
   end_paths: [ana]
 }
