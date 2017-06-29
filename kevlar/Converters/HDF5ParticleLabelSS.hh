@@ -1,5 +1,5 @@
-#ifndef HDF5VertexPlaneProjection_hh_
-#define HDF5VertexPlaneProjection_hh_
+#ifndef HDF5ParticleLabelSS_HH_
+#define HDF5ParticleLabelSS_HH_
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -8,18 +8,21 @@
 #include <string>
 #include <vector>
 
+
 namespace fhicl{
   class ParameterSet;
 }
+
 
 namespace art{
   class Event;
   class SubRun;  
 }
 
+
 namespace kevlar{
 
-  class HDF5VertexPlaneProjection : public art::EDAnalyzer {
+  class HDF5ParticleLabelSS : public art::EDAnalyzer {
     std::string fProducerName;
     std::string fG4Name;
     std::string fDataSetName;
@@ -31,18 +34,17 @@ namespace kevlar{
     H5::DSetCreatPropList fParms;// IO Parameters
     H5::DataSet* fDataSet;// points at dataset
     int fFillValue;
-    uint32_t fNEvents;
-    boost::multi_array<int, 2>  fBuffer;
-    uint32_t fBufferCounter;
+    uint32_t fNEvents;// dimension in event space
+    uint32_t fNInstances;// dimension in instance space
+
   public:
-    HDF5VertexPlaneProjection(::fhicl::ParameterSet const& );
-    ~HDF5VertexPlaneProjection();
+    HDF5ParticleLabelSS(::fhicl::ParameterSet const& );
+    ~HDF5ParticleLabelSS();
     void analyze(::art::Event const&) override;
     void beginJob() override;
-    void endJob() override;
   };
 
 }
 
-DEFINE_ART_MODULE(kevlar::HDF5VertexPlaneProjection)
-#endif // HDF5VertexPlaneProjection_hh_
+DEFINE_ART_MODULE(kevlar::HDF5ParticleLabelSS)
+#endif // HDF5ParticleLabelSS_HH_
