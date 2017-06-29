@@ -36,6 +36,7 @@ simple_plugin( HDF5ParticleLabelVector module
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
     ${HDF5_LIBRARIES}
+    ${MF_MESSAGELOGGER}
   BASENAME_ONLY
 )
 

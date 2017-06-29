@@ -23,8 +23,7 @@ namespace kevlar{
 
   HDF5ParticleLabelSS::HDF5ParticleLabelSS(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","generator")),
-      fG4Name(pSet.get<std::string>("G4Label","largeant")),
+      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
@@ -59,12 +58,13 @@ namespace kevlar{
 
   void HDF5ParticleLabelSS::analyze(art::Event const & evt)
   {
+
+
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     double vd = detprop->DriftVelocity(); //cm/musec
     art::ServiceHandle<geo::Geometry> geo;
 
     (this->fNEvents)++;
-
 
     art::Handle< std::vector< simb::MCParticle > > mct_handle;
     std::cout<<"HDF5ParticleLabelSS:"<<this->fDataSetName<<" reading into buffer"<<std::endl;

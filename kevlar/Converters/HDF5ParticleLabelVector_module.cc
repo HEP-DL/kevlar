@@ -1,12 +1,8 @@
 #include "kevlar/Converters/HDF5ParticleLabelVector.hh"
 #include "kevlar/Services/HDF5File.hh"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardataobj/RawData/RawDigit.h"
-#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "TDatabasePDG.h"
 
@@ -19,15 +15,6 @@
 
 
 namespace kevlar{
-
-  class PDGNameNotFound: public std::exception
-  {
-    virtual const char* what() const throw()
-    {
-      return "Name in particle label vector is not in PDG DB";
-    }
-  };
-
 
   HDF5ParticleLabelVector::HDF5ParticleLabelVector(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
@@ -64,33 +51,32 @@ namespace kevlar{
 
   void HDF5ParticleLabelVector::analyze(art::Event const & evt)
   {
-    
-    art::Handle< std::vector< simb::MCTruth > > mct_handle;
-    std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
+    mf::LogInfo( "HDF5ParticleLabelVector" )<<this->fDataSetName<<" reading into buffer"<<std::endl;    
+    art::Handle< std::vector< simb::MCParticle > > mct_handle;
     evt.getByLabel(fProducerName, mct_handle);
+
     for (auto truth: *mct_handle){
-      for(int i=0; i<truth.NParticles(); ++i){
-        int pdg = truth.GetParticle(i).PdgCode();
-	if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
-        std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
+      int pdg = truth.PdgCode();
+      if (abs(pdg) > 1E7) continue; // don't try GetName() o
+      std::string name = TDatabasePDG::Instance()->GetParticle(pdg)->GetName();
 
-        ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
+      ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
 
-        if(index < int(fLabels.size()) && index>=0 ){
-          std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
+      if(index < int(fLabels.size()) && index>=0 ){
+        mf::LogInfo( "HDF5ParticleLabelVector" )<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
 
 
-          fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
-        }
-        else{
-          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;       
-        }
+        fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
       }
+      else{
+        mf::LogInfo( "HDF5ParticleLabelVector" )<<"Found Particle Outside Label Table: "<<name<<std::endl;       
+      }
+
     }
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
-    std::cout<<"HDF5ParticleLabelVector Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
+    mf::LogInfo( "HDF5ParticleLabelVector" )<<"Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
 
@@ -103,12 +89,12 @@ namespace kevlar{
       filespace.selectHyperslab( H5S_SELECT_SET, this->fChunkDims, offset );
 
       H5::DataSpace memspace(2, fChunkDims);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" writing buffer to file"<<std::endl;
+      mf::LogInfo( "HDF5ParticleLabelVector" )<<this->fDataSetName<<" writing buffer to file"<<std::endl;
       this->fDataSet->write( fBuffer.data(), H5::PredType::NATIVE_INT, 
                               memspace, filespace );
       this->fBufferCounter=0;
       fBuffer = boost::multi_array<int, 2>(boost::extents[fChunkDims[0]][fChunkDims[1]]);
-      std::cout<<"HDF5ParticleLabelVector:"<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
+      mf::LogInfo( "HDF5ParticleLabelVector" )<<this->fDataSetName<<" finished resetting buffer"<<std::endl;
     }
 
   }
