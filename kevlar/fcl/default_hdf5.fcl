@@ -39,4 +39,15 @@ particleLabels:{
   CompressionLevel: 5
 }
 
+vtxprojLabels:{
+  module_type: "HDF5VertexPlaneProjection"
+  Labels: ["U","V","Y","T"]
+  ProducerLabel: "generator"
+  G4Label: "largeant"
+  DataSetLabel: "uvyt"
+  ChunkSize: 10
+  FillValue: 0
+  CompressionLevel: 5
+}
+
 END_PROLOG

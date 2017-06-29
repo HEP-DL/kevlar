@@ -8,7 +8,13 @@
 #include "lardataobj/RawData/RawDigit.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable    
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "TDatabasePDG.h"
+
+#include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
+
 
 #include <exception>
 #include <fstream>
@@ -27,11 +33,19 @@ namespace kevlar{
       return "Name in particle label vector is not in PDG DB";
     }
   };
+  class MotherNotFound: public std::exception
+  {
+    virtual const char* what() const throw()
+    {
+      return "Primary Mother particle not found.";
+    }
+  };
 
 
   HDF5VertexPlaneProjection::HDF5VertexPlaneProjection(fhicl::ParameterSet const & pSet):
       art::EDAnalyzer(pSet),
-      fProducerName(pSet.get<std::string>("ProducerLabel","largeant")),
+      fProducerName(pSet.get<std::string>("ProducerLabel","generator")),
+      fG4Name(pSet.get<std::string>("G4Label","largeant")),
       fDataSetName(pSet.get<std::string>("DataSetLabel","type")),
       fLabels(pSet.get< std::vector<std::string> >("Labels")),
       fDims{
@@ -75,36 +89,81 @@ namespace kevlar{
   void HDF5VertexPlaneProjection::analyze(art::Event const & evt)
   {
     
+    art::ServiceHandle<geo::Geometry> geo;
+    //TimeService
+    //    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
+
+    //    tss->preProcessEvent(evt);
+    // auto const* ts = tss->provider();
+
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    double vd = detprop->DriftVelocity(); //cm/musec
+
     art::Handle< std::vector< simb::MCTruth > > mct_handle;
+
     std::cout<<"HDF5VertexPlaneProjection:"<<this->fDataSetName<<" reading into buffer"<<std::endl;
     evt.getByLabel(fProducerName, mct_handle);
+    art::FindManyP<simb::MCParticle> assnMCP(mct_handle, evt, fG4Name);
+    //find origin. Somehow I thnk assnMCP is a vector, not a v-of-v's
+    std::vector< art::Ptr<simb::MCParticle> > mcpdks = assnMCP.at(0);
+
+    bool mother(false);
+
     for (auto truth: *mct_handle){
-      for(int i=0; i<truth.NParticles(); ++i){
+      for(size_t i=0; i<(size_t)truth.NParticles(); ++i){
         int pdg = truth.GetParticle(i).PdgCode();
         if (abs(pdg) > 1E7) continue; // don't try GetName() on the Argon nucleus, e.g.
-        std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+
         auto particle = TDatabasePDG::Instance()->GetParticle(pdg);
         if(!particle)
           continue;
         std::string name = particle->GetName();
 
-        ptrdiff_t index = std::find(fLabels.begin(), fLabels.end(), name) - fLabels.begin();
-
-        if(index < int(fLabels.size()) && index>=0 ){
-          std::cout<<"Found Particle with name: "<<name<< " and output vector index: "<<index<<std::endl;
+	int Wire[3] = {0,0,0};
 
 
-          fBuffer[fBufferCounter][index] = fBuffer[fBufferCounter][index] + 1;
-        }
-        else{
-          std::cout<<"Found Particle Outside Label Table: "<<name<<std::endl;       
-        }
-      }
+	for (auto const& mcpdk : mcpdks ) {
+	if ( mcpdk->Process() == "primary" )
+	  {
+	    std::cout<<"Found particle: "<<pdg<<" "<<truth.GetParticle(i).Process()<<std::endl;
+	    TLorentzVector xyzt = mcpdk->Position();
+	    const TVector3 xyz = mcpdk->Position().Vect();
+	    for (size_t ii=0; ii<3; ii++) 
+	      {
+		Wire[ii] = geo->NearestWire( xyz, ii);
+		//		std::cout << "ii, xyz, Wire are " << ii << ", " << xyz[ii] << ", " << Wire[ii] << std::endl;
+	      }
+
+	    double Time = 3200. + xyzt[0]/vd/0.5 ; // [cm]/[cm/musec]/[musec/tick] ...  to within a few ticks this is true
+		  
+	    for (int index=0; index<3; index++ )
+	      fBuffer[fBufferCounter][index] = (double) Wire[index];
+	    fBuffer[fBufferCounter][3] = Time;
+	    mother = true;
+	    break; // we only want the one pdk info
+	  } //primary
+	} // mcpdks
+	if (mother) break;
+      } // truth particles
+      if (mother) break;
+    }   // truth bundles in handle
+
+    if(! mother){
+      std::cerr<<"Problem in HDF5VertexPlaneProjection No primary Mother particle found. Throwing. "<< std::endl;
+      throw MotherNotFound();
     }
+
+    else{
+      std::cout << "";
+      for (int index=0; index<4; index++ )
+	std::cout << fBuffer[fBufferCounter][index] << ", ";
+      std::cout << "." << std::endl;
+    }
+
 
     (this->fBufferCounter)++;
     (this->fNEvents)++;
-    std::cout<<"HDF5VertexPlaneProjection Buffer for "<<this->fDataSetName<<" :"<<this->fBufferCounter<<" Events"<<std::endl;
+    std::cout<<"HDF5VertexPlaneProjection Buffer for "<<this->fDataSetName<<" : "<<this->fBufferCounter<<" Events"<<std::endl;
 
     if (this->fBufferCounter == this->fChunkDims[0]){
 
@@ -130,7 +189,7 @@ namespace kevlar{
   void HDF5VertexPlaneProjection::beginJob()
   {
     art::ServiceHandle<kevlar::HDF5File> _OutputFile;
-    std::string group_name = "label";
+    std::string group_name = "label2";
     fDataSet = _OutputFile->CreateDataSet(this->fDataSetName,group_name,
       this->fDataSpace,
       this->fParms);
@@ -140,8 +199,8 @@ namespace kevlar{
 
      {
       // Set up write buffer for attribute
-      const std::string ATTR_NAME ("index0");
-      const std::string strwritebuf ("particle_type");
+      const std::string ATTR_NAME ("coord_origin");
+      const std::string strwritebuf ("primary_uvyt_origin");
 
       // Create attribute and write to it
       H5::Attribute myatt_in = this->fDataSet->createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
@@ -184,7 +243,7 @@ namespace kevlar{
       hsize_t leftover_size[2] = { this->fBufferCounter, fChunkDims[1] };
       filespace.selectHyperslab( H5S_SELECT_SET, leftover_size, offset );
 
-      //Select a memoty space for the data to use
+      //Select a memory space for the data to use
       H5::DataSpace memspace(2, leftover_size);
 
       // Now write and reset
