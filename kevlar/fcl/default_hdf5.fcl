@@ -15,7 +15,7 @@ tpcImage: {
   fFillValue: 0
 }
 
-particleLabels:{
+particlelabels:{
   module_type: "HDF5Label"
   labels: ["e-","e+","p","pi0","pi+","pi-","mu-","mu+","k+"]
   ProducerLabel: "largeant"
@@ -25,6 +25,3 @@ particleLabels:{
 }
 
 END_PROLOG
-
-
-

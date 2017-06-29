@@ -1,5 +1,6 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
+include_directories( ${HDF5_INC} )
 
 #HDF5 Image Converter
 simple_plugin( HDF5Image module
@@ -8,7 +9,6 @@ simple_plugin( HDF5Image module
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     larcore_Geometry
     nusimdata_SimulationBase
-    ${ROOT_BASIC_LIB_LIST}
     ${HDF5_LIBRARIES}
   BASENAME_ONLY
 )

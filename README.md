@@ -71,6 +71,6 @@ mrbslp
 
 Typcial larsoft invocation:
 
-~~~ bash, as in:
+~~~ bash
 lar -c hdf5_converter.fcl -s /uboone/data/users/kolahalb/MicroBooNE/LArSoft/p+decay/Reco/prod_pdk-e+pi0_corsika_uboone_20170310T012752_gen_20170310T020937_g4_20170310T023717_detsim_20170310T055953_reco1.root
 ~~~

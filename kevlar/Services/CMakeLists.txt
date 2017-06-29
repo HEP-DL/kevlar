@@ -1,4 +1,5 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( ${HDF5_INC} )
 
 simple_plugin( HDF5File service
   ${ART_FRAMEWORK_PRINCIPAL}
