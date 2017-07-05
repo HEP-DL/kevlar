@@ -1,9 +1,0 @@
-BEGIN_PROLOG
-
-rawDigits: {
-  module_type: "Coldata"
-  ProducerLabel: "daq"
-  DataSetLabel: "rawdigits"
-}
-
-END_PROLOG

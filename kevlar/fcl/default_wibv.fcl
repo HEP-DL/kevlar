@@ -1,8 +1,0 @@
-BEGIN_PROLOG
-
-rawDigitsProduce: {
-  module_type: "ColdataValidation"
-  FilePath: "/path/to/the/WIBFramesFiles.dat"
-}
-
-END_PROLOG
