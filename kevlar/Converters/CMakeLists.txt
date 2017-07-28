@@ -1,12 +1,12 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
+
 include_directories(
   $ENV{HDF5_DIR}/hdf5/src
   $ENV{HDF5_DIR}/hdf5/c++/src
   $ENV{HDF5_DIR}/hdf5/hl/src
   $ENV{HDF5_DIR}/hdf5/hl/c++/src
 )
-
 
 #HDF5 Image Converter
 simple_plugin( HDF5RawDigits module
@@ -15,7 +15,7 @@ simple_plugin( HDF5RawDigits module
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     larcore_Geometry
     nusimdata_SimulationBase
-    ${HDF5_LIBRARIES_TO_EXPORT}
+    ${HDF5_CPP} ${HDF5_HL} ${HDF5_HL_CPP} ${HDF5} ${HDF5_LIBRARIES_TO_EXPORT} 
     BASENAME_ONLY
 )
 
@@ -28,7 +28,7 @@ simple_plugin( HDF5Wires module
     lardata_RecoObjects
     lardataobj_RecoBase
     nusimdata_SimulationBase
-    ${HDF5_LIBRARIES_TO_EXPORT}
+    ${HDF5_CPP} ${HDF5_HL} ${HDF5_HL_CPP} ${HDF5} ${HDF5_LIBRARIES_TO_EXPORT} 
     BASENAME_ONLY
 )
 
@@ -41,8 +41,8 @@ simple_plugin( HDF5ParticleLabelVector module
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
-    ${HDF5_LIBRARIES_TO_EXPORT}
-      ${MF_MESSAGELOGGER}
+    ${HDF5_CPP} ${HDF5_HL} ${HDF5_HL_CPP} ${HDF5} ${HDF5_LIBRARIES_TO_EXPORT} 
+    ${MF_MESSAGELOGGER}
   BASENAME_ONLY
 )
 
@@ -55,7 +55,7 @@ simple_plugin( HDF5VertexPlaneProjection module
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
-    ${HDF5_LIBRARIES_TO_EXPORT}
+    ${HDF5_CPP} ${HDF5_HL} ${HDF5_HL_CPP} ${HDF5} ${HDF5_LIBRARIES_TO_EXPORT} 
     BASENAME_ONLY
 )
 
@@ -68,7 +68,7 @@ simple_plugin( HDF5ParticleLabelSS module
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
-    ${HDF5_LIBRARIES_TO_EXPORT}
+    ${HDF5_CPP} ${HDF5_HL} ${HDF5_HL_CPP} ${HDF5} ${HDF5_LIBRARIES_TO_EXPORT} 
     BASENAME_ONLY
 )
 

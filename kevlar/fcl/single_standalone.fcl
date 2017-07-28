@@ -88,8 +88,9 @@ physics:
     wires: @local::wires
     particlelabels: @local::particleLabels
     vtxproj: @local::vtxprojLabels
+    semanticSegments : @local::semanticSegments
   }
-  ana: [tpcimage, wires, particlelabels, vtxproj ]
+  ana: [wires, particlelabels, semanticSegments, vtxproj]
 
  simulate: [ rns,
              generator,
