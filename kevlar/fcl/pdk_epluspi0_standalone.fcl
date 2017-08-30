@@ -28,7 +28,6 @@ services:
   MemoryTracker:           @local::microboone_memory_tracker
   FileCatalogMetadata:  @local::art_file_catalog_mc
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "single_hist_uboone.root" }
   RandomNumberGenerator:   {} #ART native random number generator
   message:                 @local::microboone_message_services_prod_debug
   HDF5File:{ FileName: "output.h5"  }
@@ -113,23 +112,11 @@ physics:
             caldata,
             gaushit]
 
- stream1:  [ out1 ]
-
  trigger_paths: [ simulate ] 
 
- end_paths:     [ stream1, ana ]  
+ end_paths:     [ ana ] #[ stream1, ana ]  
 }
 
-outputs:
-{
- out1:
- {
-   module_type: RootOutput
-   fileName:    "single_gen_uboone.root"
-   dataTier:    "convert"
-   compressionLevel: 1
- }
-}
 
 physics.producers.generator.module_type: "NucleonDecay"
 physics.producers.generator.DecayMode: 1
