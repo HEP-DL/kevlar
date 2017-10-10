@@ -19,9 +19,9 @@ flcdir  product_dir     fcl
 
 product          version
 kevlar           v04_01_00
-boost            v1_63_0a
+boost            v1_64_0
 hdf5             v1_9_236
-uboonecode       v06_38_00
+uboonecode       v06_51_00
 gcc              v6_3_0
 cetbuildtools    v5_09_01       -       only_for_build
 end_product_list

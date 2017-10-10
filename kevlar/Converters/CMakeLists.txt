@@ -8,7 +8,8 @@ simple_plugin( HDF5RawDigits module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    larcore_Geometry
+    larcorealg_Geometry
+    larcore_Geometry_Geometry_service
     nusimdata_SimulationBase
     ${HDF5_LIBRARIES}
   BASENAME_ONLY
@@ -19,7 +20,8 @@ simple_plugin( HDF5Wires module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    larcore_Geometry
+    larcorealg_Geometry	     
+    larcore_Geometry_Geometry_service
     lardata_RecoObjects
     lardataobj_RecoBase
     nusimdata_SimulationBase
@@ -32,7 +34,8 @@ simple_plugin( HDF5ParticleLabelVector module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    larcore_Geometry
+    larcorealg_Geometry	     
+    larcore_Geometry_Geometry_service
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
@@ -46,7 +49,8 @@ simple_plugin( HDF5VertexPlaneProjection module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    larcore_Geometry
+    larcorealg_Geometry	     
+    larcore_Geometry_Geometry_service
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}
@@ -59,7 +63,8 @@ simple_plugin( HDF5ParticleLabelSS module
     HDF5File_service
     ${ART_FRAMEWORK_PRINCIPAL}
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    larcore_Geometry
+    larcorealg_Geometry	     
+    larcore_Geometry_Geometry_service
     nusimdata_SimulationBase
     ${ROOT_BASIC_LIB_LIST}
     ${ROOT_EG}

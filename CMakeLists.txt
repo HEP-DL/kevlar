@@ -22,6 +22,7 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
 
 cet_report_compiler_flags()
 
+find_ups_product( larcoreobj v1_00_00 )
 find_ups_product( lardataobj v1_00_00 )
 find_ups_product( larsim v1_00_00 )
 find_ups_product( art v1_08_00 )
