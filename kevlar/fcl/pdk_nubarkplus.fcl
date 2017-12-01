@@ -1,0 +1,5 @@
+#include "prod_single_dl.fcl"
+
+physics.producers.generator.module_type: "NucleonDecay"
+physics.producers.generator.DecayMode: 19
+physics.producers.generator.DecayedNucleon:  2212
