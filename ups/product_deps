@@ -19,21 +19,23 @@ flcdir  product_dir     fcl
 
 product          version
 kevlar           v04_01_00
-boost            v1_63_0a
-hdf5             v01_02_00
-dunetpc          v06_35_00
+boost            v1_65_1
+hdf5             v1_10_1b
+#dunetpc          v06_35_00
+uboonecode       v06_65_00
 FrameGen	 v02_02_00
 gcc              v6_3_0
-cetbuildtools    v5_06_07       -       only_for_build
+cetbuildtools    v6_01_01       -       only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the dependencies.
 # Make a table by adding columns before "notes". 
-qualifier	dunetpc 	  hdf5 	    boost     gcc	 notes
+qualifier	uboonecode 	hdf5 	    boost     gcc	 notes
 e10:debug	e10:debug	e10:debug e10:debug -nq-
 e10:opt		e10:opt		e10:opt   e10:opt   -nq-
 e10:prof	e10:prof	e10:prof  e10:prof  -nq-
-e14:debug	e14:debug	e14:debug e14:debug -nq-
+#e14:debug	e14:debug	e14:debug e14:debug -nq-
+e14:debug	e14:debug	e14       e14:debug -nq-
 e14:opt		e14:opt		e14:opt   e14:opt   -nq-
 e14:prof	e14:prof	e14:prof  e14:prof  -nq-
 end_qualifier_list
