@@ -5,6 +5,7 @@ process_name: WIBFrames
 
 services: {
   @table::microboone_simulation_services
+  TFileService: { fileName: "wibcreate_hist.root" }
 }
 
 services.DetectorPropertiesService.NumberTimeSamples:        6400
